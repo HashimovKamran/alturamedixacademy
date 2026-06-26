@@ -96,4 +96,6 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     });
 });
 
+require __DIR__.'/generic-pagebuilder.php';
+
 Route::any('/{any}', [LegacyRedirectController::class, 'redirect'])->where('any', '.*');

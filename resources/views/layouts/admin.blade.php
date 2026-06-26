@@ -183,7 +183,7 @@
                 @endif
             @endforeach
             @if(Route::has('admin.visual-editor.index'))
-                <a class="{{ request()->routeIs('admin.page-builder.*') ? 'active' : '' }}" href="{{ route('admin.page-builder.index') }}"><i class="ti ti-layout-grid-add"></i> Səhifə redaktoru</a>
+                <a class="{{ (request()->routeIs('admin.page-builder.*') || request()->routeIs('pagebuilder.*')) ? 'active' : '' }}" href="{{ route('pagebuilder.dashboard') }}"><i class="ti ti-layout-grid-add"></i> Səhifə redaktoru</a>
             @endif
             @if(Route::has('admin.media.index'))
                 <a class="{{ request()->routeIs('admin.media.*') ? 'active' : '' }}" href="{{ route('admin.media.index') }}"><i class="ti ti-folder-open"></i> Media kitabxanası</a>
