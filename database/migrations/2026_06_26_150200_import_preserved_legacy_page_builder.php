@@ -14,7 +14,6 @@ return new class extends Migration {
         $publications = $this->rows('aa_legacy_page_publications');
         $revisions = $this->rows('aa_legacy_page_revisions');
         $blocks = $this->rows('aa_legacy_page_builder_blocks');
-
         $keys = collect([$documents, $publications, $revisions, $blocks])
             ->flatMap(fn (Collection $rows) => $rows->map(fn ($row) => $this->get($row, 'lang_code', 'az').'|'.$this->get($row, 'page_key', 'index')))
             ->filter(fn (string $key) => str_contains($key, '|'))
@@ -23,10 +22,27 @@ return new class extends Migration {
 
         foreach ($keys as $key) {
             [$language, $pageKey] = explode('|', $key, 2);
+            $this->importPage($language, $pageKey, $documents, $publications, $revisions, $blocks);
+        }
+
+        // aa_legacy_* tables deliberately remain as an archived rollback safety net.
+    }
+
+    public function down(): void
+    {
+        // The legacy backup rename migration restores original names after visual tables are rolled back.
+    }
+
+    private function importPage(string $language, string $pageKey, Collection $documents, Collection $publications, Collection $revisions, Collection $blocks): void
+    {
+        DB::transaction(function () use ($language, $pageKey, $documents, $publications, $revisions, $blocks): void {
             $page = $this->page($language, $pageKey);
+            if (DB::table('aa_visual_page_activities')->where('page_id', $page->id)->where('event', 'legacy_imported')->exists()) {
+                return;
+            }
+
             $number = (int) DB::table('aa_visual_page_revisions')->where('page_id', $page->id)->max('revision_number');
             $activeId = null;
-
             $legacyRevisions = $revisions
                 ->filter(fn ($row) => $this->get($row, 'lang_code') === $language && $this->get($row, 'page_key') === $pageKey)
                 ->sortBy(fn ($row) => (int) $this->get($row, 'revision_number', $this->get($row, 'version', $this->get($row, 'id', 0))));
@@ -34,36 +50,17 @@ return new class extends Migration {
             foreach ($legacyRevisions as $legacy) {
                 $document = $this->document($this->get($legacy, 'document_json'), $this->decode($this->get($legacy, 'blocks_json')));
                 if ($this->empty($document)) continue;
-                $number++;
-                $activeId = $this->revision(
-                    $page->id,
-                    $number,
-                    'published',
-                    $document,
-                    $this->get($legacy, 'created_by'),
-                    $this->get($legacy, 'created_at'),
-                    'Imported legacy revision'
-                );
+                $activeId = $this->revision($page->id, ++$number, 'published', $document, $this->get($legacy, 'created_by'), $this->get($legacy, 'created_at'), 'Imported legacy revision');
             }
 
             $publication = $publications
                 ->filter(fn ($row) => $this->get($row, 'lang_code') === $language && $this->get($row, 'page_key') === $pageKey)
                 ->sortByDesc(fn ($row) => (string) $this->get($row, 'published_at', $this->get($row, 'updated_at', '')))
                 ->first();
-
             if ($publication) {
                 $document = $this->document($this->get($publication, 'document_json'), $this->decode($this->get($publication, 'blocks_json')));
                 if (! $this->empty($document)) {
-                    $number++;
-                    $activeId = $this->revision(
-                        $page->id,
-                        $number,
-                        'published',
-                        $document,
-                        $this->get($publication, 'published_by'),
-                        $this->get($publication, 'published_at'),
-                        'Imported legacy public snapshot'
-                    );
+                    $activeId = $this->revision($page->id, ++$number, 'published', $document, $this->get($publication, 'published_by'), $this->get($publication, 'published_at'), 'Imported legacy public snapshot');
                 }
             }
 
@@ -71,40 +68,24 @@ return new class extends Migration {
                 ->filter(fn ($row) => $this->get($row, 'lang_code') === $language && $this->get($row, 'page_key') === $pageKey)
                 ->sortByDesc(fn ($row) => (string) $this->get($row, 'updated_at', $this->get($row, 'id', '')))
                 ->first();
-
             $document = $draft
                 ? $this->document($this->get($draft, 'document_json'))
                 : $this->fromBlocks($blocks->filter(fn ($row) => $this->get($row, 'lang_code') === $language && $this->get($row, 'page_key') === $pageKey));
-
             if (! $this->empty($document)) {
-                $number++;
-                $this->revision(
-                    $page->id,
-                    $number,
-                    'draft',
-                    $document,
-                    $draft ? $this->get($draft, 'updated_by', $this->get($draft, 'created_by')) : null,
-                    null,
-                    'Imported legacy working draft',
-                    1
-                );
+                $this->revision($page->id, ++$number, 'draft', $document, $draft ? $this->get($draft, 'updated_by', $this->get($draft, 'created_by')) : null, null, 'Imported legacy working draft', 1);
             }
 
             if ($activeId) {
-                DB::table('aa_visual_pages')->where('id', $page->id)->update([
-                    'active_revision_id' => $activeId,
-                    'updated_at' => now(),
-                ]);
+                DB::table('aa_visual_pages')->where('id', $page->id)->update(['active_revision_id' => $activeId, 'updated_at' => now()]);
             }
-        }
-
-        // Keep the aa_legacy_* tables as an archival rollback safety net. They are no longer
-        // referenced by runtime code and can be removed only after a verified production backup.
-    }
-
-    public function down(): void
-    {
-        // The previous migration restores aa_legacy_* names after visual tables are rolled back.
+            DB::table('aa_visual_page_activities')->insert([
+                'page_id' => $page->id,
+                'actor_id' => null,
+                'event' => 'legacy_imported',
+                'payload' => json_encode(['language' => $language, 'page_key' => $pageKey]),
+                'created_at' => now(),
+            ]);
+        });
     }
 
     private function rows(string $table): Collection
@@ -114,13 +95,9 @@ return new class extends Migration {
 
     private function page(string $language, string $pageKey): object
     {
-        $page = DB::table('aa_visual_pages')->where('lang_code', $language)->where('page_key', $pageKey)->first();
+        $page = DB::table('aa_visual_pages')->where('lang_code', $language)->where('page_key', $pageKey)->lockForUpdate()->first();
         if ($page) return $page;
-
-        $title = Schema::hasTable('aa_pages')
-            ? DB::table('aa_pages')->where('lang_code', $language)->where('page_key', $pageKey)->value('title')
-            : null;
-
+        $title = Schema::hasTable('aa_pages') ? DB::table('aa_pages')->where('lang_code', $language)->where('page_key', $pageKey)->value('title') : null;
         $id = DB::table('aa_visual_pages')->insertGetId([
             'lang_code' => $language,
             'page_key' => $pageKey,
@@ -131,7 +108,6 @@ return new class extends Migration {
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-
         return DB::table('aa_visual_pages')->where('id', $id)->first();
     }
 
@@ -158,17 +134,10 @@ return new class extends Migration {
         $old = $this->decode($raw);
         if ($old === [] && $fallback !== []) return $this->fromRows($fallback);
         if ($old === []) return $this->blank();
-
         $main = $this->convertMap((array) ($old['sections'] ?? []), (array) ($old['order'] ?? []));
         $header = $this->convertMap((array) ($old['layout']['header']['sections'] ?? []), (array) ($old['layout']['header']['order'] ?? []));
         $footer = $this->convertMap((array) ($old['layout']['footer']['sections'] ?? []), (array) ($old['layout']['footer']['order'] ?? []));
-
-        return [
-            'schema_version' => 1,
-            'layout' => ['type' => 'alturamedix', 'header' => $header, 'footer' => $footer],
-            'sections' => $main['sections'],
-            'order' => $main['order'],
-        ];
+        return ['schema_version' => 1, 'layout' => ['type' => 'alturamedix', 'header' => $header, 'footer' => $footer], 'sections' => $main['sections'], 'order' => $main['order']];
     }
 
     private function convertMap(array $items, array $order): array
@@ -229,14 +198,8 @@ return new class extends Migration {
             }
             return [$nodes, $order];
         };
-
         [$sections, $order] = $build();
-        return [
-            'schema_version' => 1,
-            'layout' => ['type' => 'alturamedix', 'header' => ['sections' => [], 'order' => []], 'footer' => ['sections' => [], 'order' => []]],
-            'sections' => $sections,
-            'order' => $order,
-        ];
+        return ['schema_version' => 1, 'layout' => ['type' => 'alturamedix', 'header' => ['sections' => [], 'order' => []], 'footer' => ['sections' => [], 'order' => []]], 'sections' => $sections, 'order' => $order];
     }
 
     private function decode(mixed $value): array
