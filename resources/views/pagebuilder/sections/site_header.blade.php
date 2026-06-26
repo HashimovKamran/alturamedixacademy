@@ -1,7 +1,9 @@
 @pbSchema(['name' => 'site_header.blade'])
 @php
     $enabled = fn(string $key) => \App\Support\Cms\NativeBlockOptions::enabled($content, $key);
-    $headerLogo = trim((string)$block->image_path) ?: $logoImage;
+    // Brand settings are the single source of truth. The builder image is retained only as a legacy fallback.
+    $settingsLogo = trim((string) ($siteSettings['header_logo_image'] ?? '')) ?: trim((string) ($logoImage ?? ''));
+    $headerLogo = $settingsLogo !== '' ? $settingsLogo : trim((string) $block->image_path);
 @endphp
 <header class="site-header aa-site-header" id="siteHeader" data-block-uuid="{{ $block->block_uuid }}">
     <div class="container aa-header-inner">
