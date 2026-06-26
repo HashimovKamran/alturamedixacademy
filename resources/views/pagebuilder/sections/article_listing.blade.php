@@ -6,7 +6,7 @@
     $allView = $siteSettings['all_view'] ?? ($ui['view_all'] ?? 'Hamısına bax');
     $articleUrl = fn ($article) => \App\Support\CleanUrl::to('article?slug='.urlencode($article->slug), $lang);
 @endphp
-@if($block->page_key === 'index')
+@if(($activePage ?? '') === 'index')
 <section class="aa-article-showcase">
     <div class="aa-section-heading"><h2 data-inline-field="title">{{ $content['title'] ?: ($siteSettings['section_articles'] ?? 'Akademik yazılar') }}</h2><a href="{{ \App\Support\CleanUrl::to('articles', $lang) }}">{{ $allView }} <i class="fa-solid fa-arrow-right"></i></a></div>
 
