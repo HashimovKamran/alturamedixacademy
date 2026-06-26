@@ -3,7 +3,7 @@
 @if($items->isNotEmpty())
 <section class="aa-feature-section">
     <div class="container">
-        <div class="aa-section-heading aa-feature-heading"><h2 data-inline-field="title">{{ $content['title'] ?: ($siteSettings['section_features'] ?? 'Akademik imkanlarımız') }}</h2></div>
+        <div class="aa-section-heading aa-feature-heading"><h2 data-inline-field="title">{{ ($content['title'] ?? '') ?: ($siteSettings['section_features'] ?? 'Akademik imkanlarımız') }}</h2></div>
         <div class="aa-feature-grid">
             @foreach($items as $item)
                 <a href="{{ \App\Support\CleanUrl::to($item->url ?: '#', $lang) }}" class="aa-feature-card">
