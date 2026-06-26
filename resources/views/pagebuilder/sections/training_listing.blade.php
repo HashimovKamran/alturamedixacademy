@@ -4,7 +4,7 @@
     $items = \App\Models\Training::query()->forLanguage($lang)->active()->orderBy('training_date')->orderBy('sort_order')->limit($limit)->get();
     $date = app(\App\Services\Site\DateFormatter::class);
 @endphp
-@if($block->page_key === 'index')
+@if(($activePage ?? '') === 'index')
 <section class="aa-training-panel">
     <div class="aa-section-heading"><h2 data-inline-field="title">{{ $content['title'] ?? ($siteSettings['section_trainings'] ?? ($ui['courses_and_conferences'] ?? 'Təlim və konfranslar')) }}</h2><a href="{{ \App\Support\CleanUrl::to('trainings', $lang) }}">{{ $siteSettings['all_view'] ?? ($ui['view_all'] ?? 'Hamısına bax') }} <i class="fa-solid fa-arrow-right"></i></a></div>
     <div class="aa-training-list">
