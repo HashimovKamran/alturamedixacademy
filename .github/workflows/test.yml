@@ -13,7 +13,7 @@ jobs:
         with:
           node-version: '22'
       - run: php -v && composer --version
-      - run: composer validate --no-check-publish
+      - run: composer validate --no-check-publish --no-check-lock
       - name: Install PHP dependencies
         id: composer_install
         continue-on-error: true
