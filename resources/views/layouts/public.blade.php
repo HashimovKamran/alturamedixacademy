@@ -30,6 +30,7 @@
     $activeAboutSection = in_array((string) request()->query('section'), ['who', 'mission', 'board'], true)
         ? (string) request()->query('section')
         : 'who';
+    $isHomepage = ($activePage ?? '') === 'index';
 @endphp
 <!doctype html>
 <html lang="{{ $lang }}">
@@ -52,14 +53,15 @@
     @hasSection('meta_image')<meta property="og:image" content="@yield('meta_image')">@endif
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Noto+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
     <link rel="stylesheet" href="{{ asset('css/page-builder.css') }}">
     <link rel="stylesheet" href="{{ asset('css/laravel-fixes.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/alturamedix-home.css') }}">
     @stack('styles')
 </head>
-<body>
+<body class="{{ $isHomepage ? 'aa-home-page' : '' }}">
 @include('public.partials.composition', ['pageBuilderDocument' => $headerBuilderDocument ?? null, 'pageBuilderBlocks' => $headerBuilderBlocks ?? collect(), 'templatePart' => true])
 
 @yield('content')
@@ -145,49 +147,23 @@
     let timer = null;
     const lang = @json($lang);
     const searchUrl = @json(route('search.api'));
-    const escapeHtml = (value) => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
-    const open = () => {
-        backdrop.classList.add('is-open');
-        backdrop.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('auth-locked');
-        setTimeout(() => input.focus(), 40);
-    };
-    const close = () => {
-        backdrop.classList.remove('is-open');
-        backdrop.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('auth-locked');
-    };
-    const empty = (text) => {
-        results.innerHTML = '<div class="site-search-empty">' + escapeHtml(text) + '</div>';
-    };
+    const escapeHtml = (value) => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&gt;','>':'&quot;','"':'&quot;',"'":'&#039;'}[char]));
+    const open = () => { backdrop.classList.add('is-open'); backdrop.setAttribute('aria-hidden', 'false'); document.body.classList.add('auth-locked'); setTimeout(() => input.focus(), 40); };
+    const close = () => { backdrop.classList.remove('is-open'); backdrop.setAttribute('aria-hidden', 'true'); document.body.classList.remove('auth-locked'); };
+    const empty = (text) => { results.innerHTML = '<div class="site-search-empty">' + escapeHtml(text) + '</div>'; };
     const render = (items) => {
-        if (!items.length) {
-            empty(@json($ui['search_no_results']));
-            return;
-        }
-        results.innerHTML = items.map(item => `
-            <a class="site-search-result" href="${escapeHtml(item.url)}">
-                <i class="${escapeHtml(item.icon)}"></i>
-                <span><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.description || '')}</span></span>
-                <small>${escapeHtml(item.type)}</small>
-            </a>
-        `).join('');
+        if (!items.length) { empty(@json($ui['search_no_results'])); return; }
+        results.innerHTML = items.map(item => `<a class="site-search-result" href="${escapeHtml(item.url)}"><i class="${escapeHtml(item.icon)}"></i><span><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.description || '')}</span></span><small>${escapeHtml(item.type)}</small></a>`).join('');
     };
     const run = async () => {
         const q = input.value.trim();
-        if (q.length < 2) {
-            empty(@json($ui['search_min_chars']));
-            return;
-        }
+        if (q.length < 2) { empty(@json($ui['search_min_chars'])); return; }
         empty(@json($ui['searching']));
         const response = await fetch(searchUrl + '?q=' + encodeURIComponent(q) + '&lang=' + encodeURIComponent(lang), {headers: {'Accept': 'application/json'}});
         const data = await response.json();
         render(data.results || []);
     };
-    const debounce = () => {
-        clearTimeout(timer);
-        timer = setTimeout(run, 220);
-    };
+    const debounce = () => { clearTimeout(timer); timer = setTimeout(run, 220); };
     document.querySelectorAll('[data-site-search-open]').forEach(button => button.addEventListener('click', open));
     document.querySelectorAll('[data-site-search-close]').forEach(button => button.addEventListener('click', close));
     backdrop.addEventListener('click', event => { if (event.target === backdrop) close(); });
