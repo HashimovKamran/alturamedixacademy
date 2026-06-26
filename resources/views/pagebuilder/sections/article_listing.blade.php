@@ -8,7 +8,7 @@
 @endphp
 @if(($activePage ?? '') === 'index')
 <section class="aa-article-showcase">
-    <div class="aa-section-heading"><h2 data-inline-field="title">{{ $content['title'] ?: ($siteSettings['section_articles'] ?? 'Akademik yazılar') }}</h2><a href="{{ \App\Support\CleanUrl::to('articles', $lang) }}">{{ $allView }} <i class="fa-solid fa-arrow-right"></i></a></div>
+    <div class="aa-section-heading"><h2 data-inline-field="title">{{ ($content['title'] ?? '') ?: ($siteSettings['section_articles'] ?? 'Akademik yazılar') }}</h2><a href="{{ \App\Support\CleanUrl::to('articles', $lang) }}">{{ $allView }} <i class="fa-solid fa-arrow-right"></i></a></div>
 
     @if($categories->isNotEmpty())
         <div class="aa-category-row">
