@@ -3,7 +3,6 @@
 namespace App\AlturaPageBuilder\Rendering;
 
 use App\AlturaPageBuilder\Catalog\AlturaComponentCatalog;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\View;
 
 final class VisualDocumentRenderer
@@ -16,7 +15,10 @@ final class VisualDocumentRenderer
         'profile_card', 'site_header', 'site_footer',
     ];
 
-    public function __construct(private readonly AlturaComponentCatalog $catalog) {}
+    public function __construct(
+        private readonly AlturaComponentCatalog $catalog,
+        private readonly VisualAssetPathResolver $assets,
+    ) {}
 
     public function renderDocument(array $document, array $context = []): string
     {
@@ -67,17 +69,23 @@ final class VisualDocumentRenderer
 
     private function prepared(string $id, array $raw): array
     {
-        $component = new VisualComponent($raw);
+        $component = new VisualComponent($raw, $this->assets);
         $blocks = is_array($raw['blocks'] ?? null) ? $raw['blocks'] : [];
         $order = is_array($raw['order'] ?? null) ? $raw['order'] : array_keys($blocks);
         $children = collect();
-        foreach ($order as $childId) if (isset($blocks[$childId]) && is_array($blocks[$childId])) $children->push($this->prepared((string) $childId, $blocks[$childId]));
+        foreach ($order as $childId) {
+            if (isset($blocks[$childId]) && is_array($blocks[$childId])) {
+                $children->push($this->prepared((string) $childId, $blocks[$childId]));
+            }
+        }
         return ['id' => $id, 'raw' => $raw, 'block' => $component, 'children' => $children];
     }
 
     private function viewName(string $type): ?string
     {
-        foreach (['pagebuilder.sections.'.$type, 'pagebuilder.blocks.'.$type] as $view) if (View::exists($view)) return $view;
+        foreach (['pagebuilder.sections.'.$type, 'pagebuilder.blocks.'.$type] as $view) {
+            if (View::exists($view)) return $view;
+        }
         return null;
     }
 }
