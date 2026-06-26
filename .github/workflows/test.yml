@@ -40,7 +40,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          php artisan test --configuration=phpunit.visual.xml 2>&1 | tee phpunit.log
+          vendor/bin/phpunit --configuration=phpunit.visual.xml 2>&1 | tee phpunit.log
           exit ${PIPESTATUS[0]}
       - name: Upload PHPUnit log
         if: always()
