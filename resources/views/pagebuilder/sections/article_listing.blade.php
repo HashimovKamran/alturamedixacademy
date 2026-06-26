@@ -4,11 +4,12 @@
     $items = \App\Models\Article::query()->with('category')->forLanguage($lang)->active()->latest('published_at')->latest('id')->limit($limit)->get();
     $categories = \App\Models\ArticleCategory::query()->forLanguage($lang)->active()->where('is_featured', true)->orderBy('sort_order')->orderBy('id')->limit(6)->get();
     $allView = $siteSettings['all_view'] ?? ($ui['view_all'] ?? 'Hamısına bax');
+    $homeTitle = $siteSettings['home_articles_title'] ?? 'Akademik yazılar';
     $articleUrl = fn ($article) => \App\Support\CleanUrl::to('article?slug='.urlencode($article->slug), $lang);
 @endphp
 @if(($activePage ?? '') === 'index')
 <section class="aa-article-showcase">
-    <div class="aa-section-heading"><h2 data-inline-field="title">{{ ($content['title'] ?? '') ?: ($siteSettings['section_articles'] ?? 'Akademik yazılar') }}</h2><a href="{{ \App\Support\CleanUrl::to('articles', $lang) }}">{{ $allView }} <i class="fa-solid fa-arrow-right"></i></a></div>
+    <div class="aa-section-heading"><h2>{{ $homeTitle }}</h2><a href="{{ \App\Support\CleanUrl::to('articles', $lang) }}">{{ $allView }} <i class="fa-solid fa-arrow-right"></i></a></div>
 
     @if($categories->isNotEmpty())
         <div class="aa-category-row">
