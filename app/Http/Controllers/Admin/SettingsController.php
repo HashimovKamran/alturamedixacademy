@@ -10,6 +10,7 @@ use App\Support\Admin\AdminLanguage;
 use App\Support\Cms\SafeUrl;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class SettingsController extends Controller
@@ -30,16 +31,16 @@ class SettingsController extends Controller
     public function update(Request $request, UploadService $uploads, AdminLogService $logs): RedirectResponse
     {
         $request->validate([
-            'logo_image' => ['nullable', 'file', 'mimes:svg', 'max:2048'],
-            'header_logo_image' => ['nullable', 'file', 'mimes:svg', 'max:2048'],
-            'hero_logo_image' => ['nullable', 'file', 'mimes:svg', 'max:2048'],
+            'logo_image' => ['nullable', 'file', 'mimes:svg,png,jpg,jpeg,webp', 'max:5120'],
+            'header_logo_image' => ['nullable', 'file', 'mimes:svg,png,jpg,jpeg,webp', 'max:5120'],
+            'hero_logo_image' => ['nullable', 'file', 'mimes:svg,png,jpg,jpeg,webp', 'max:5120'],
         ], [
-            'logo_image.mimes' => 'Loqo yalnız SVG formatında olmalıdır.',
-            'header_logo_image.mimes' => 'Header / footer loqosu yalnız SVG formatında olmalıdır.',
-            'hero_logo_image.mimes' => 'Hero loqosu yalnız SVG formatında olmalıdır.',
-            'logo_image.max' => 'Loqo maksimum 2 MB olmalıdır.',
-            'header_logo_image.max' => 'Header / footer loqosu maksimum 2 MB olmalıdır.',
-            'hero_logo_image.max' => 'Hero loqosu maksimum 2 MB olmalıdır.',
+            'logo_image.mimes' => 'Loqo SVG, PNG, JPG və ya WEBP formatında olmalıdır.',
+            'header_logo_image.mimes' => 'Header / footer loqosu SVG, PNG, JPG və ya WEBP formatında olmalıdır.',
+            'hero_logo_image.mimes' => 'Hero loqosu SVG, PNG, JPG və ya WEBP formatında olmalıdır.',
+            'logo_image.max' => 'Loqo maksimum 5 MB olmalıdır.',
+            'header_logo_image.max' => 'Header / footer loqosu maksimum 5 MB olmalıdır.',
+            'hero_logo_image.max' => 'Hero loqosu maksimum 5 MB olmalıdır.',
         ]);
 
         $language = AdminLanguage::selected($request);
@@ -71,21 +72,50 @@ class SettingsController extends Controller
             }
         }
 
+        $updatedLogos = [];
         foreach ($this->logoKeys() as $imageKey) {
-            $logo = $uploads->store($request->file($imageKey), 'settings');
-            if ($logo) {
-                foreach ($languageCodes as $code) {
-                    Setting::query()->updateOrCreate(
-                        ['lang_code' => $code, 'setting_key' => $imageKey],
-                        ['setting_value' => $logo]
-                    );
-                }
+            if (! $request->hasFile($imageKey)) {
+                continue;
             }
+
+            $file = $request->file($imageKey);
+            if (! $file || ! $file->isValid()) {
+                throw ValidationException::withMessages([
+                    $imageKey => 'Loqo faylı oxuna bilmədi. Faylı yenidən seçib təkrar yoxlayın.',
+                ]);
+            }
+
+            $logo = $uploads->store($file, 'settings');
+            if (! $logo) {
+                throw ValidationException::withMessages([
+                    $imageKey => 'Loqo yüklənmədi. SVG, PNG, JPG və ya WEBP formatında, maksimum 5 MB olan etibarlı fayl seçin.',
+                ]);
+            }
+
+            foreach ($languageCodes as $code) {
+                Setting::query()->updateOrCreate(
+                    ['lang_code' => $code, 'setting_key' => $imageKey],
+                    ['setting_value' => $logo]
+                );
+            }
+
+            $updatedLogos[] = $imageKey;
         }
 
-        $logs->write($request, 'settings', 'update', 'Sayt ayarları yadda saxlanıldı: '.strtoupper($language), 'Setting');
+        $logs->write(
+            $request,
+            'settings',
+            'update',
+            'Sayt ayarları yadda saxlanıldı: '.strtoupper($language).($updatedLogos !== [] ? ' | Loqolar: '.implode(', ', $updatedLogos) : ''),
+            'Setting'
+        );
 
-        return redirect()->route('admin.settings.index')->with('status', 'Ayarlar yadda saxlanıldı.');
+        return redirect()->route('admin.settings.index')->with(
+            'status',
+            $updatedLogos === []
+                ? 'Ayarlar yadda saxlanıldı.'
+                : 'Loqo uğurla yükləndi və bütün dillər üçün yeniləndi.'
+        );
     }
 
     private function logoKeys(): array
