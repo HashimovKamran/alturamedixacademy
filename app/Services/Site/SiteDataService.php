@@ -2,7 +2,7 @@
 
 namespace App\Services\Site;
 
-use App\AlturaPageBuilder\Services\AlturaPageBuilderService;
+use App\AlturaPageBuilder\Services\PublicVisualPageResolver;
 use App\Models\Advertisement;
 use App\Models\Article;
 use App\Models\ArticleCategory;
@@ -26,7 +26,7 @@ class SiteDataService
     public function __construct(
         private readonly LanguageService $languages,
         private readonly SettingService $settings,
-        private readonly AlturaPageBuilderService $visualBuilder,
+        private readonly PublicVisualPageResolver $visualDocuments,
     ) {}
 
     public function language(Request $request): string
@@ -73,14 +73,12 @@ class SiteDataService
 
     public function pageBuilderBlocks(string $language, string $pageKey, bool $preview = false): Collection
     {
-        // Public rendering is now entirely document based. The empty collection preserves
-        // the old view-data contract for templates unrelated to the visual builder.
         return collect();
     }
 
     public function pageBuilderDocument(string $language, string $pageKey, bool $preview = false): array
     {
-        return $this->visualBuilder->publicDocument($language, $pageKey, $preview);
+        return $this->visualDocuments->document($language, $pageKey, $preview);
     }
 
     public function builderPreview(Request $request): bool
@@ -147,6 +145,7 @@ class SiteDataService
             'ru' => ['about' => 'О нас', 'contact' => 'Контакты', 'certificates' => 'Дипломы и сертификаты', 'gallery' => 'Галерея', 'trainings' => 'Курсы', 'articles' => 'Научные статьи'],
             'tr' => ['about' => 'Hakkımızda', 'contact' => 'İletişim', 'certificates' => 'Diploma ve Sertifikalar', 'gallery' => 'Galeri', 'trainings' => 'Eğitimler', 'articles' => 'Akademik Yazılar'],
         ];
+
         return $titles[$language][$key] ?? ucfirst(str_replace(['-', '_'], ' ', $key));
     }
 }
