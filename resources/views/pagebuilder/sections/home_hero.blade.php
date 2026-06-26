@@ -1,5 +1,6 @@
 @pbSchema(['name' => 'home_hero.blade'])
 @php
+    $siteName = trim((string) (($siteSettings['site_name'] ?? null) ?: ($settings['site_name'] ?? null) ?: 'ALTURAMEDIX ACADEMY'));
     $sliders = \App\Models\Slider::query()->forLanguage($lang)->active()->orderBy('sort_order')->get();
     $stats = \App\Models\HomeStat::query()->forLanguage($lang)->active()->orderBy('sort_order')->get();
     $autoplay = max(2500, (int) ($content['autoplay_ms'] ?? 6200));
