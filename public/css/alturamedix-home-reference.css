@@ -1,0 +1,65 @@
+/* Final reference-alignment overrides for the Alturamedix homepage. */
+.aa-home-page .container{
+    width:calc(100% - 64px)!important;
+    max-width:none!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+}
+.aa-home-page .aa-header-inner{min-height:82px;gap:26px}
+.aa-home-page .aa-brand .brand-logo{width:52px;height:52px}
+.aa-home-page .aa-brand .brand-text strong{font-size:16px}
+.aa-home-page .aa-main-nav{gap:23px}
+.aa-home-page .aa-main-nav>a,.aa-home-page .aa-main-nav .nav-link{padding-top:31px;padding-bottom:27px}
+.aa-home-page .aa-main-nav>a:after,.aa-home-page .aa-main-nav .nav-link:after{bottom:18px}
+.aa-home-page .aa-hero-art{background-position:68% center!important}
+.aa-home-page .aa-hero-container{padding-left:76px;padding-right:34px}
+.aa-home-page .aa-hero-copy{width:min(555px,52%)}
+.aa-home-page .aa-hero-copy h1{font-size:clamp(50px,4.6vw,75px);max-width:565px}
+.aa-home-page .aa-hero-description{max-width:450px}
+.aa-home-page .aa-hero-stats-wrap{padding-left:76px;padding-right:34px}
+.aa-home-page .aa-home-content{padding-top:26px}
+.aa-home-page .aa-home-grid{grid-template-columns:minmax(0,1.86fr) minmax(344px,.94fr);gap:24px}
+.aa-home-page .aa-article-showcase,.aa-home-page .aa-training-panel{padding:20px}
+.aa-home-page .aa-section-heading{margin-bottom:18px}
+.aa-home-page .aa-section-heading h2{font-size:23px}
+.aa-home-page .aa-category-row{gap:11px;margin-bottom:20px}
+.aa-home-page .aa-category-image{height:145px}
+.aa-home-page .aa-category-card strong{font-size:11px}
+.aa-home-page .aa-article-image{height:164px}
+.aa-home-page .aa-article-body{padding:14px}
+.aa-home-page .aa-article-body h3{font-size:14px}
+.aa-home-page .aa-training-card{grid-template-columns:118px minmax(0,1fr);gap:15px}
+.aa-home-page .aa-training-cover{width:118px;height:118px}
+.aa-home-page .aa-training-copy h3{font-size:15px}
+.aa-home-page .aa-training-copy p{font-size:11px}
+.aa-home-page .aa-journal-promo{margin-top:0;min-height:166px;grid-template-columns:130px minmax(0,1fr) 150px}
+.aa-home-page .aa-feature-section{padding-top:4px}
+.aa-home-page .aa-feature-section .container{padding:22px}
+.aa-home-page .aa-feature-grid{gap:13px}
+.aa-home-page .aa-feature-card{min-height:116px;padding:17px}
+.aa-home-page .aa-partner-strip{padding-top:14px;padding-bottom:26px}
+.aa-home-page .site-footer .footer-grid{padding-top:4px}
+@media(min-width:1440px){
+    .aa-home-page .container{width:min(1420px,calc(100% - 96px))!important}
+}
+@media(max-width:1100px){
+    .aa-home-page .container{width:calc(100% - 44px)!important}
+    .aa-home-page .aa-main-nav{gap:15px}
+    .aa-home-page .aa-main-nav>a,.aa-home-page .aa-main-nav .nav-link{font-size:11px}
+    .aa-home-page .aa-hero-copy h1{font-size:clamp(47px,5.5vw,64px)}
+    .aa-home-page .aa-home-grid{grid-template-columns:minmax(0,1.75fr) minmax(305px,.92fr)}
+    .aa-home-page .aa-category-image{height:125px}
+}
+@media(max-width:920px){
+    .aa-home-page .container{width:calc(100% - 38px)!important}
+    .aa-home-page .aa-header-inner{min-height:76px}
+    .aa-home-page .aa-main-nav{top:76px}
+    .aa-home-page .aa-hero-container{padding-left:62px}
+    .aa-home-page .aa-home-grid{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+    .aa-home-page .container{width:calc(100% - 30px)!important}
+    .aa-home-page .aa-category-image{height:112px}
+    .aa-home-page .aa-article-image{height:100%}
+    .aa-home-page .aa-training-cover{width:106px;height:106px}
+}
