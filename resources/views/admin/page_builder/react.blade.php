@@ -4,7 +4,7 @@
 @section('content')
 <div id="altura-page-builder-root"
      data-api-base="{{ url('/admin/page-editor/api') }}"
-     data-canvas-url="{{ url('/admin/page-editor/canvas') }}?lang_code={{ urlencode($language) }}"
+     data-canvas-url="{{ url('/admin/page-editor/canvas') }}?lang_code={{ urlencode($language) }}&page={{ urlencode($pageKey) }}"
      data-preview-url="{{ $previewUrl }}"
      data-page-key="{{ $pageKey }}"
      data-language="{{ $language }}"
