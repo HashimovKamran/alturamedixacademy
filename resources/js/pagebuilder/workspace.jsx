@@ -92,13 +92,15 @@ export default function Workspace({ mount }) {
         }).catch((error) => setNotice(error.message));
     }, []);
 
-    if (!catalog || !documentModel || !page) {
-        return <div className="apb-loading">Page Builder yüklənir…</div>;
-    }
+    if (!catalog || !documentModel || !page) return <div className="apb-loading">Page Builder yüklənir…</div>;
 
     const selectedNode = nodeAt(documentModel, zone, selectedPath);
     const selectedDefinition = selectedNode
         ? (selectedPath.length === 1 ? catalog.sections[selectedNode.type] : (catalog.blocks[selectedNode.type] || catalog.sections[selectedNode.type]))
+        : null;
+    const parentNode = selectedPath.length > 1 ? nodeAt(documentModel, zone, selectedPath.slice(0, -1)) : null;
+    const parentDefinition = parentNode
+        ? (selectedPath.length === 2 ? catalog.sections[parentNode.type] : (catalog.blocks[parentNode.type] || catalog.sections[parentNode.type]))
         : null;
     const currentMap = mapFor(documentModel, zone);
 
@@ -133,6 +135,11 @@ export default function Workspace({ mount }) {
     const setField = (key, value) => mutate((next) => {
         const node = nodeAt(next, zone, selectedPath);
         if (node) node.settings[key] = value;
+    });
+
+    const setSlot = (slotKey) => mutate((next) => {
+        const node = nodeAt(next, zone, selectedPath);
+        if (node) node.slot_key = slotKey;
     });
 
     const makeNode = (type, definition, slotKey = 'default') => ({
@@ -337,6 +344,7 @@ export default function Workspace({ mount }) {
                 {!selectedNode ? <p>Section və ya block seçin.</p> : <>
                     <h3>{selectedDefinition?.label || selectedNode.type}</h3>
                     {canEdit && <div><button onClick={() => move('up')}>↑</button><button onClick={() => move('down')}>↓</button><button onClick={duplicate}>Kopyala</button><button onClick={remove}>Sil</button></div>}
+                    {selectedPath.length > 1 && parentDefinition?.slots?.length > 0 && <label>Slot<select disabled={!canEdit} value={selectedNode.slot_key || parentDefinition.slots[0]} onChange={(event) => setSlot(event.target.value)}>{parentDefinition.slots.map((slot) => <option key={slot} value={slot}>{slot}</option>)}</select></label>}
                     <label>Gizlət<input type="checkbox" disabled={!canEdit} checked={selectedNode.disabled} onChange={(event) => mutate((next) => { const node = nodeAt(next, zone, selectedPath); node.disabled = event.target.checked; })} /></label>
                     {Object.entries(selectedDefinition?.fields || {}).map(([field, item]) => <Field key={field} field={item} value={selectedNode.settings[field]} disabled={!canEdit} change={(value) => setField(field, value)} />)}
                     {canEdit && availableBlocks.length > 0 && <button className="primary" onClick={() => setModal('blocks')}>+ İç blok</button>}
