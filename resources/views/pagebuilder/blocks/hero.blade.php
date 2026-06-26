@@ -1,0 +1,3 @@
+@pbSchema(['name' => 'hero.blade'])
+@if($content['eyebrow']??false)<div class="pb-kicker">{{ $content['eyebrow'] }}</div>@endif
+<div class="pb-hero-grid"><div class="pb-content"><h2>{{ $content['title']??$block->title }}</h2>@if($content['text']??false)<p>{{ $content['text'] }}</p>@endif @if($content['button_text']??false)<a class="pb-btn" href="{{ \App\Support\Cms\SafeUrl::clean($content['button_url']??'#') }}">{{ $content['button_text'] }}</a>@endif</div>@if($block->image_path)<div class="pb-media"><img src="{{ asset(ltrim($block->image_path,'/')) }}" alt="{{ $content['title']??'' }}"></div>@endif</div>

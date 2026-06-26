@@ -1,0 +1,2 @@
+@pbSchema(['name' => 'home_content_grid.blade'])
+<section class="content-section"><div class="container page-grid"><div class="main-column">@foreach($children->filter(fn($child)=>$child['block']->slot_key==='main') as $child)@include('pagebuilder.partials.node',['node'=>$child,'embedded'=>true])@endforeach</div><aside class="side-column">@foreach($children->filter(fn($child)=>$child['block']->slot_key==='sidebar') as $child)@include('pagebuilder.partials.node',['node'=>$child,'embedded'=>true])@endforeach</aside></div></section>

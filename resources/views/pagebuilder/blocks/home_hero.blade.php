@@ -1,0 +1,16 @@
+@pbSchema(['name' => 'home_hero.blade'])
+@php
+    $sliders=\App\Models\Slider::query()->forLanguage($lang)->active()->orderBy('sort_order')->get();
+    $stats=\App\Models\HomeStat::query()->forLanguage($lang)->active()->orderBy('sort_order')->get();
+    $autoplay=max(2500,(int)($content['autoplay_ms']??6200));
+    $settings['site_name'] = $siteSettings['site_name'] ?? '';
+    $settings['site_description'] = $siteSettings['site_description'] ?? '';
+@endphp
+<section class="hero-section"><div class="hero-slider" id="heroSlider" data-slider data-autoplay-ms="{{ $autoplay }}">
+@forelse($sliders as $index=>$slider)
+<div class="hero-slide {{ $index===0?'active':'' }}"><div class="hero-bg {{ !$slider->image_path?'no-image':'' }}" style="{{ $slider->image_path?"background-image:url('".asset(ltrim($slider->image_path,'/'))."')":'' }}"></div><div class="container hero-content"><div class="hero-text"><div class="hero-title-row"><span class="hero-logo"><i class="fa-solid fa-shield-heart"></i></span><div><h1 data-entity="slider" data-entity-id="{{ $slider->id }}" data-entity-field="title">{{ $slider->title }}</h1>@if($slider->subtitle)<p data-entity="slider" data-entity-id="{{ $slider->id }}" data-entity-field="subtitle">{{ $slider->subtitle }}</p>@endif</div></div>@if($slider->description)<div class="hero-description" data-entity="slider" data-entity-id="{{ $slider->id }}" data-entity-field="description">{{ $slider->description }}</div>@endif<div class="hero-buttons">@if($slider->button_1_text)<a class="btn btn-primary btn-lg" href="{{ \App\Support\CleanUrl::to($slider->button_1_url?:'#',$lang) }}" data-entity="slider" data-entity-id="{{ $slider->id }}" data-entity-field="button_1_text">{{ $slider->button_1_text }} <i class="fa-solid fa-arrow-right"></i></a>@endif @if($slider->button_2_text)<a class="btn btn-light btn-lg" href="{{ \App\Support\CleanUrl::to($slider->button_2_url?:'#',$lang) }}" data-entity="slider" data-entity-id="{{ $slider->id }}" data-entity-field="button_2_text">{{ $slider->button_2_text }} <i class="fa-solid fa-arrow-right"></i></a>@endif</div>@if(\App\Support\Cms\NativeBlockOptions::enabled($content,'show_stats')&&$stats->isNotEmpty())<div class="hero-stats">@foreach($stats as $stat)<div class="stat-item"><i class="{{ $stat->icon_class?:'fa-solid fa-circle-info' }}"></i><div><strong data-entity="stat" data-entity-id="{{ $stat->id }}" data-entity-field="number_text">{{ $stat->number_text }}</strong><span data-entity="stat" data-entity-id="{{ $stat->id }}" data-entity-field="title">{{ $stat->title }}</span></div></div>@endforeach</div>@endif</div></div></div>
+@empty
+<div class="hero-slide active"><div class="hero-bg no-image"></div><div class="container hero-content"><div class="hero-text"><h1>{{ $settings['site_name']??'' }}</h1><div class="hero-description">{{ $settings['site_description']??'' }}</div></div></div></div>
+@endforelse
+@if($sliders->count()>1)<button class="slider-arrow slider-prev" type="button" data-slider-prev><i class="fa-solid fa-chevron-left"></i></button><button class="slider-arrow slider-next" type="button" data-slider-next><i class="fa-solid fa-chevron-right"></i></button><div class="slider-dots">@foreach($sliders as $index=>$slider)<button type="button" class="{{ $index===0?'active':'' }}" data-slider-dot="{{ $index }}"></button>@endforeach</div>@endif
+</div></section>
