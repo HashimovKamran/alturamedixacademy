@@ -5,6 +5,8 @@
     margin-left:auto!important;
     margin-right:auto!important;
 }
+/* Uploaded brand assets must render exactly as saved in Admin Settings. */
+.aa-home-page .aa-brand .brand-logo img{filter:none!important}
 .aa-home-page .aa-header-inner{min-height:82px;gap:26px}
 .aa-home-page .aa-brand .brand-logo{width:52px;height:52px}
 .aa-home-page .aa-brand .brand-text strong{font-size:16px}
