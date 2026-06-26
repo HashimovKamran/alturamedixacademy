@@ -5,7 +5,8 @@
     $articleChildren = $mainChildren->filter(fn ($child) => $child['block']->type === 'article_listing');
     $journalChildren = $mainChildren->filter(fn ($child) => $child['block']->type === 'home_journal');
     $lowerChildren = $mainChildren->filter(fn ($child) => in_array($child['block']->type, ['feature_listing', 'partner_listing'], true));
-    $otherMainChildren = $mainChildren->filter(fn ($child) => ! in_array($child['block']->type, ['article_listing', 'home_journal', 'feature_listing', 'partner_listing'], true));
+    // category_listing is now rendered inside article_listing on the homepage, so it must not appear twice.
+    $otherMainChildren = $mainChildren->filter(fn ($child) => ! in_array($child['block']->type, ['article_listing', 'category_listing', 'home_journal', 'feature_listing', 'partner_listing'], true));
 @endphp
 <section class="aa-home-content">
     <div class="container aa-home-content-container">
