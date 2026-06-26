@@ -1,11 +1,11 @@
 @pbSchema(['name' => 'partner_listing.blade'])
 @php
-    $limit = max(0, (int) ($content['limit'] ?? 0));
-    $query = \App\Models\Partner::query()->forLanguage($lang)->active()->orderBy('sort_order')->orderBy('id');
-    if ($limit > 0) {
-        $query->limit($limit);
-    }
-    $items = $query->get();
+    $items = \App\Models\Partner::query()
+        ->forLanguage($lang)
+        ->active()
+        ->orderBy('sort_order')
+        ->orderBy('id')
+        ->get();
     // Approximately 44px/sec regardless of partner count, while keeping the complete cycle reasonable.
     $duration = max(28, min(120, (int) ceil($items->count() * 4)));
 @endphp
