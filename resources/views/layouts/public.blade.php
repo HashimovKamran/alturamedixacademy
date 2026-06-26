@@ -147,7 +147,7 @@
     let timer = null;
     const lang = @json($lang);
     const searchUrl = @json(route('search.api'));
-    const escapeHtml = (value) => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&gt;','>':'&quot;','"':'&quot;',"'":'&#039;'}[char]));
+    const escapeHtml = (value) => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
     const open = () => { backdrop.classList.add('is-open'); backdrop.setAttribute('aria-hidden', 'false'); document.body.classList.add('auth-locked'); setTimeout(() => input.focus(), 40); };
     const close = () => { backdrop.classList.remove('is-open'); backdrop.setAttribute('aria-hidden', 'true'); document.body.classList.remove('auth-locked'); };
     const empty = (text) => { results.innerHTML = '<div class="site-search-empty">' + escapeHtml(text) + '</div>'; };
