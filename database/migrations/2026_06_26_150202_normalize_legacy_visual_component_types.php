@@ -13,11 +13,14 @@ return new class extends Migration {
             $document = json_decode((string) $revision->document_json, true);
             if (! is_array($document)) continue;
 
-            $document['sections'] = $this->normalizeMap((array) ($document['sections'] ?? []));
+            $document['sections'] = $this->normalizeMap((array) ($document['sections'] ?? []), 'main');
             foreach (['header', 'footer'] as $zone) {
                 $layout = (array) ($document['layout'][$zone] ?? []);
-                $layout['sections'] = $this->normalizeMap((array) ($layout['sections'] ?? []));
-                $layout['order'] = array_values((array) ($layout['order'] ?? []));
+                $layout['sections'] = $this->normalizeMap((array) ($layout['sections'] ?? []), $zone);
+                $layout['order'] = array_values(array_filter((array) ($layout['order'] ?? []), fn ($id) => isset($layout['sections'][$id])));
+                foreach (array_keys($layout['sections']) as $id) {
+                    if (! in_array($id, $layout['order'], true)) $layout['order'][] = $id;
+                }
                 $document['layout'][$zone] = $layout;
             }
 
@@ -30,9 +33,9 @@ return new class extends Migration {
 
     public function down(): void {}
 
-    private function normalizeMap(array $nodes): array
+    private function normalizeMap(array $nodes, string $zone): array
     {
-        $types = [
+        $legacy = [
             'text' => 'rich_text',
             'video' => 'video_embed',
             'native_home' => 'home_content_grid',
@@ -44,12 +47,37 @@ return new class extends Migration {
             'native_trainings' => 'training_listing',
             'native_profile' => 'profile_card',
         ];
+        $allowed = [
+            'site_header', 'site_footer', 'home_hero', 'home_content_grid', 'home_journal',
+            'page_content', 'contact_grid', 'rich_text', 'image_text', 'cards', 'stat_list',
+            'faq', 'cta', 'video_embed', 'gallery', 'button_group', 'spacer', 'divider',
+            'group', 'columns', 'article_listing', 'article_archive', 'article_detail',
+            'training_listing', 'category_listing', 'feature_listing', 'partner_listing',
+            'advertisement_listing', 'gallery_listing', 'certificate_lookup', 'profile_card',
+            'contact_info', 'contact_form', 'map_embed', 'card', 'stat', 'faq_item',
+            'gallery_item', 'button',
+        ];
 
         foreach ($nodes as $id => $node) {
             if (! is_array($node)) continue;
-            $node['type'] = $types[$node['type'] ?? 'rich_text'] ?? ($node['type'] ?? 'rich_text');
-            $node['blocks'] = $this->normalizeMap((array) ($node['blocks'] ?? []));
+
+            $original = (string) ($node['type'] ?? 'rich_text');
+            $type = $legacy[$original] ?? $original;
+            if (! in_array($type, $allowed, true)) {
+                $type = match ($zone) {
+                    'header' => 'site_header',
+                    'footer' => 'site_footer',
+                    default => 'rich_text',
+                };
+                $node['_name'] = $node['_name'] ?? ('Imported legacy: '.$original);
+            }
+
+            $node['type'] = $type;
+            $node['blocks'] = $this->normalizeMap((array) ($node['blocks'] ?? []), 'main');
             $node['order'] = array_values((array) ($node['order'] ?? array_keys($node['blocks'])));
+            foreach (array_keys($node['blocks']) as $childId) {
+                if (! in_array($childId, $node['order'], true)) $node['order'][] = $childId;
+            }
             $nodes[$id] = $node;
         }
 
