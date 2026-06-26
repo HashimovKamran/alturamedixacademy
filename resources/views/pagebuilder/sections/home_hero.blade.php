@@ -15,11 +15,11 @@
 @endphp
 <section class="hero-section aa-home-hero">
     <aside class="aa-hero-rail" aria-label="{{ $siteName }} əlaqə linkləri">
-        @if($phone)<a href="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}" class="aa-rail-phone">{{ $phone }}</a>@endif
-        @if($phone)<a href="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}" class="aa-rail-icon" aria-label="{{ $phone }}"><i class="fa-solid fa-phone"></i></a>@endif
+        @if($phone)<a href="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}" class="aa-rail-phone">{{ $phone }}</a>@else<span class="aa-rail-phone aa-rail-phone-empty"></span>@endif
+        <a href="{{ $phone ? 'tel:'.preg_replace('/[^0-9+]/', '', $phone) : '#' }}" class="aa-rail-icon" aria-label="{{ $phone ?: 'Telefon' }}" @unless($phone) onclick="return false" @endunless><i class="fa-solid fa-phone"></i></a>
         @foreach($socials as $social)
             @php($url = trim((string) ($siteSettings[$social['key']] ?? '')))
-            @if($url && $url !== '#')<a href="{{ \App\Support\Cms\SafeUrl::clean($url) }}" target="_blank" rel="noopener noreferrer" class="aa-rail-icon" aria-label="{{ $social['label'] }}"><i class="{{ $social['icon'] }}"></i></a>@endif
+            <a href="{{ $url ? \App\Support\Cms\SafeUrl::clean($url) : '#' }}" @if($url) target="_blank" rel="noopener noreferrer" @else onclick="return false" @endif class="aa-rail-icon" aria-label="{{ $social['label'] }}"><i class="{{ $social['icon'] }}"></i></a>
         @endforeach
     </aside>
 
