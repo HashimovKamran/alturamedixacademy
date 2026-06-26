@@ -11,10 +11,17 @@ final class AlturaPageRevisionWorkflow
     {
         return DB::transaction(function () use ($language, $pageKey, $revisionId, $actorId, $note): array {
             $page = $this->page($language, $pageKey, true);
-            $draft = DB::table('aa_visual_page_revisions')->where('id', $revisionId)->where('page_id', $page->id)->lockForUpdate()->first();
-            if (! $draft || $draft->status !== 'draft') {
+            $draft = DB::table('aa_visual_page_revisions')
+                ->where('id', $revisionId)
+                ->where('page_id', $page->id)
+                ->where('status', 'draft')
+                ->lockForUpdate()
+                ->first();
+
+            if (! $draft) {
                 throw ValidationException::withMessages(['revision_id' => 'Dərc ediləcək aktiv draft tapılmadı.']);
             }
+
             DB::table('aa_visual_page_revisions')->where('id', $draft->id)->update([
                 'status' => 'published',
                 'change_note' => mb_substr(trim((string) $note), 0, 255),
@@ -22,11 +29,14 @@ final class AlturaPageRevisionWorkflow
                 'published_at' => now(),
                 'updated_at' => now(),
             ]);
+
             DB::table('aa_visual_pages')->where('id', $page->id)->update([
                 'active_revision_id' => $draft->id,
                 'is_archived' => false,
+                'is_deleted' => false,
                 'updated_at' => now(),
             ]);
+
             $this->activity($page->id, $actorId, 'published', ['revision_id' => (int) $draft->id]);
             return $this->payload(DB::table('aa_visual_page_revisions')->where('id', $draft->id)->first());
         });
@@ -36,10 +46,17 @@ final class AlturaPageRevisionWorkflow
     {
         return DB::transaction(function () use ($language, $pageKey, $revisionId, $actorId): array {
             $page = $this->page($language, $pageKey, true);
-            $source = DB::table('aa_visual_page_revisions')->where('id', $revisionId)->where('page_id', $page->id)->whereIn('status', ['published', 'archived'])->lockForUpdate()->first();
+            $source = DB::table('aa_visual_page_revisions')
+                ->where('id', $revisionId)
+                ->where('page_id', $page->id)
+                ->whereIn('status', ['published', 'archived'])
+                ->lockForUpdate()
+                ->first();
+
             if (! $source) {
                 throw ValidationException::withMessages(['revision_id' => 'Bərpa ediləcək revision tapılmadı.']);
             }
+
             $number = (int) DB::table('aa_visual_page_revisions')->where('page_id', $page->id)->max('revision_number') + 1;
             $id = DB::table('aa_visual_page_revisions')->insertGetId([
                 'page_id' => $page->id,
@@ -55,7 +72,14 @@ final class AlturaPageRevisionWorkflow
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            DB::table('aa_visual_pages')->where('id', $page->id)->update(['active_revision_id' => $id, 'is_archived' => false, 'updated_at' => now()]);
+
+            DB::table('aa_visual_pages')->where('id', $page->id)->update([
+                'active_revision_id' => $id,
+                'is_archived' => false,
+                'is_deleted' => false,
+                'updated_at' => now(),
+            ]);
+
             $this->activity($page->id, $actorId, 'rollback', ['source_revision_id' => (int) $source->id, 'revision_id' => $id]);
             return $this->payload(DB::table('aa_visual_page_revisions')->where('id', $id)->first());
         });
@@ -65,7 +89,11 @@ final class AlturaPageRevisionWorkflow
     {
         DB::transaction(function () use ($language, $pageKey, $actorId): void {
             $page = $this->page($language, $pageKey, true);
-            DB::table('aa_visual_pages')->where('id', $page->id)->update(['is_archived' => true, 'active_revision_id' => null, 'updated_at' => now()]);
+            DB::table('aa_visual_pages')->where('id', $page->id)->update([
+                'is_archived' => true,
+                'active_revision_id' => null,
+                'updated_at' => now(),
+            ]);
             $this->activity($page->id, $actorId, 'archived', []);
         });
     }
@@ -74,13 +102,25 @@ final class AlturaPageRevisionWorkflow
     {
         return DB::transaction(function () use ($language, $pageKey, $actorId): array {
             $page = $this->page($language, $pageKey, true);
-            $revision = DB::table('aa_visual_page_revisions')->where('page_id', $page->id)->whereIn('status', ['published', 'archived'])->latest('revision_number')->first();
+            $revision = DB::table('aa_visual_page_revisions')
+                ->where('page_id', $page->id)
+                ->whereIn('status', ['published', 'archived'])
+                ->latest('revision_number')
+                ->first();
+
             if (! $revision) {
                 throw ValidationException::withMessages(['page' => 'Bərpa ediləcək revision yoxdur.']);
             }
-            DB::table('aa_visual_pages')->where('id', $page->id)->update(['is_archived' => false, 'active_revision_id' => $revision->id, 'updated_at' => now()]);
+
+            DB::table('aa_visual_pages')->where('id', $page->id)->update([
+                'is_archived' => false,
+                'is_deleted' => false,
+                'active_revision_id' => $revision->id,
+                'updated_at' => now(),
+            ]);
+
             $this->activity($page->id, $actorId, 'restored', ['revision_id' => (int) $revision->id]);
-            return ['id' => (int) $page->id, 'page_key' => $page->page_key, 'lang_code' => $page->lang_code, 'active_revision_id' => (int) $revision->id];
+            return $this->pagePayload(DB::table('aa_visual_pages')->where('id', $page->id)->first());
         });
     }
 
@@ -91,6 +131,19 @@ final class AlturaPageRevisionWorkflow
         $page = $query->first();
         if (! $page) throw ValidationException::withMessages(['page_key' => 'Səhifə tapılmadı.']);
         return $page;
+    }
+
+    private function pagePayload(object $page): array
+    {
+        return [
+            'id' => (int) $page->id,
+            'lang_code' => $page->lang_code,
+            'page_key' => $page->page_key,
+            'title' => $page->title,
+            'is_archived' => (bool) $page->is_archived,
+            'is_deleted' => (bool) $page->is_deleted,
+            'active_revision_id' => $page->active_revision_id ? (int) $page->active_revision_id : null,
+        ];
     }
 
     private function payload(object $row): array
@@ -110,6 +163,12 @@ final class AlturaPageRevisionWorkflow
 
     private function activity(int $pageId, ?int $actorId, string $event, array $payload): void
     {
-        DB::table('aa_visual_page_activities')->insert(['page_id' => $pageId, 'actor_id' => $actorId, 'event' => $event, 'payload' => json_encode($payload), 'created_at' => now()]);
+        DB::table('aa_visual_page_activities')->insert([
+            'page_id' => $pageId,
+            'actor_id' => $actorId,
+            'event' => $event,
+            'payload' => json_encode($payload),
+            'created_at' => now(),
+        ]);
     }
 }
