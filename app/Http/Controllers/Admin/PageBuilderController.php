@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\AlturaPageBuilder\Services\AlturaPageBuilderService;
 use App\Http\Controllers\Controller;
 use App\Support\Admin\AdminLanguage;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -21,12 +22,12 @@ final class PageBuilderController extends Controller
         return view('admin.page_builder.react', compact('language', 'pageKey', 'page', 'pages', 'previewUrl'));
     }
 
-    public function canvas(Request $request): View
+    public function canvas(Request $request): RedirectResponse
     {
-        return view('admin.page_builder.canvas', [
-            'language' => AdminLanguage::selected($request),
-            'pageKey' => preg_replace('/[^a-z0-9_-]/', '', strtolower((string) $request->query('page', 'index'))) ?: 'index',
-        ]);
+        $language = AdminLanguage::selected($request);
+        $pageKey = preg_replace('/[^a-z0-9_-]/', '', strtolower((string) $request->query('page', 'index'))) ?: 'index';
+
+        return redirect()->to($this->previewUrl($pageKey, $language));
     }
 
     private function previewUrl(string $pageKey, string $language): string
@@ -42,7 +43,11 @@ final class PageBuilderController extends Controller
             'profile' => '/profile',
             default => '/page?key='.urlencode($pageKey),
         };
-        $separator = str_contains($path, '?') ? '&' : '?';
-        return url($path).$separator.http_build_query(['lang' => $language, 'pb_preview' => 1, 'pb_page' => $pageKey]);
+
+        return url($path).(str_contains($path, '?') ? '&' : '?').http_build_query([
+            'lang' => $language,
+            'pb_preview' => 1,
+            'pb_page' => $pageKey,
+        ]);
     }
 }
