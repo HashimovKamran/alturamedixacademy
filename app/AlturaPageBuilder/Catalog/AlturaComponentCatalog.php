@@ -1,260 +1,46 @@
 <?php
-
 namespace App\AlturaPageBuilder\Catalog;
 
 final class AlturaComponentCatalog
 {
-    /**
-     * The catalog is deliberately code-owned. Content authors can only choose
-     * components and fields explicitly declared here; they can never select a
-     * Blade view, CSS class, PHP callable or arbitrary HTML template.
-     */
-    public function payload(): array
-    {
+    public function payload(): array{return ['sections'=>$this->sections(),'blocks'=>$this->blocks(),'templates'=>['default'=>['label'=>'Standart Alturamedix səhifəsi'],'article'=>['label'=>'Məqalə detalı'],'profile'=>['label'=>'Profil']],'theme_settings'=>[]];}
+    public function component(string $kind,string $type):?array{return ($kind==='section'?$this->sections():$this->blocks())[$type]??null;}
+    public function defaultsFor(string $type,string $kind):array{$d=$this->component($kind,$type);return $d?array_map(fn($v)=>$v['default']??null,$d['fields']):[];}
+    public function defaultDocument(string $pageKey):array{
+        $node=function(string $type,array $settings=[],array $blocks=[],array $order=[],string $slot='default'):array{return ['type'=>$type,'_name'=>null,'disabled'=>false,'slot_key'=>$slot,'settings'=>array_merge($this->defaultsFor($type,'section')?:$this->defaultsFor($type,'block'),$settings),'blocks'=>$blocks,'order'=>$order];};
+        $id=fn(string $name)=>$name.'_'.substr(hash('sha256',$pageKey.'|'.$name),0,12);
+        $d=['schema_version'=>1,'layout'=>['type'=>'alturamedix','header'=>['sections'=>[],'order'=>[]],'footer'=>['sections'=>[],'order'=>[]]],'sections'=>[],'order'=>[]];
+        if($pageKey==='__header'){$k=$id('site_header');$d['layout']['header']=['sections'=>[$k=>$node('site_header')],'order'=>[$k]];return $d;}
+        if($pageKey==='__footer'){$k=$id('site_footer');$d['layout']['footer']=['sections'=>[$k=>$node('site_footer')],'order'=>[$k]];return $d;}
+        if($pageKey==='index'){$hero=$id('home_hero');$grid=$id('home_content_grid');$journal=$id('home_journal');$articles=$id('article_listing');$trainings=$id('training_listing');$features=$id('feature_listing');$partners=$id('partner_listing');$ads=$id('advertisement_listing');$d['sections'][$hero]=$node('home_hero');$d['sections'][$grid]=$node('home_content_grid',[],[$journal=>$node('home_journal',[],[],[],'main'),$articles=>$node('article_listing',['limit'=>12],[],[],'main'),$trainings=>$node('training_listing',['limit'=>6],[],[],'main'),$features=>$node('feature_listing',[],[],[],'main'),$partners=>$node('partner_listing',['limit'=>20],[],[],'main'),$ads=>$node('advertisement_listing',['position'=>'sidebar','limit'=>4],[],[],'sidebar')],[$journal,$articles,$trainings,$features,$partners,$ads]);$d['order']=[$hero,$grid];return $d;}
+        $type=match($pageKey){'contact'=>'contact_grid','certificates'=>'certificate_lookup','gallery'=>'gallery_listing','trainings'=>'training_listing','articles'=>'article_archive','article_detail'=>'article_detail','profile'=>'profile_card',default=>'page_content'};$k=$id($type);
+        if($type==='contact_grid'){$info=$id('contact_info');$form=$id('contact_form');$d['sections'][$k]=$node($type,[],[$info=>$node('contact_info',[],[],[],'info'),$form=>$node('contact_form',[],[],[],'form')],[$info,$form]);}else $d['sections'][$k]=$node($type);$d['order']=[$k];return $d;
+    }
+    private function sections():array{
+        $main=['main'];$children=$this->childTypes();
         return [
-            'sections' => $this->sections(),
-            'blocks' => $this->blocks(),
-            'templates' => [
-                'default' => ['label' => 'Standart Alturamedix səhifəsi'],
-                'article' => ['label' => 'Məqalə detalı'],
-                'profile' => ['label' => 'Profil'],
-            ],
-            'theme_settings' => [
-                [
-                    'name' => 'Brend görünüşü',
-                    'settings' => [
-                        $this->field('colors.primary', 'Əsas rəng', 'color', '#0f3850'),
-                        $this->field('colors.accent', 'Vurğu rəngi', 'color', '#df7412'),
-                        $this->field('colors.surface', 'Səth rəngi', 'color', '#ffffff'),
-                    ],
-                ],
-            ],
+            'site_header'=>$this->d('Alturamedix Header','Sistem',['header'],[['show_brand','Logo və brend','checkbox',true],['show_languages','Dil seçimi','checkbox',true],['show_social','Sosial linklər','checkbox',true],['show_navigation','Əsas menyu','checkbox',true],['show_auth','Giriş / qeydiyyat','checkbox',true],['show_search','Axtarış','checkbox',true]],[],[],true),
+            'site_footer'=>$this->d('Alturamedix Footer','Sistem',['footer'],[['show_about','Brend məlumatı','checkbox',true],['show_links','Sürətli keçidlər','checkbox',true],['show_contact','Əlaqə məlumatı','checkbox',true],['show_newsletter','Bülleten','checkbox',true],['copyright_text','Copyright mətni','text','']],[],[],true),
+            'home_hero'=>$this->d('Ana səhifə hero / slider','Ana səhifə',$main,[['show_stats','Statistikaları göstər','checkbox',true],['autoplay_ms','Slayd intervalı','number',6200,2500,20000]]),
+            'home_content_grid'=>$this->d('Ana səhifə məzmun grid-i','Ana səhifə',$main,[],$children,['main','sidebar']),
+            'home_journal'=>$this->d('MEDEPICENT Journal','Ana səhifə',$main,[]),
+            'page_content'=>$this->d('Standart səhifə məzmunu','Səhifə',$main,[['title','Başlıq override','text',''],['subtitle','Alt başlıq override','textarea',''],['html','Mətn override','rich_text',''],['show_image','Əsas şəkli göstər','checkbox',true]]),
+            'contact_grid'=>$this->d('Əlaqə səhifəsi grid-i','Səhifə',$main,[],['contact_info','contact_form','map_embed'],['info','form']),
+            'rich_text'=>$this->d('Mətn','Məzmun',$main,[['title','Başlıq','text',''],['html','Mətn','rich_text','']]),
+            'image_text'=>$this->d('Şəkil və mətn','Məzmun',$main,[['eyebrow','Üst başlıq','text',''],['title','Başlıq','text',''],['html','Mətn','rich_text',''],['image_path','Şəkil URL','url',''],['button_text','Düymə mətni','text',''],['button_url','Düymə linki','url','']]),
+            'cards'=>$this->d('Kartlar','Məzmun',$main,[['title','Bölmə başlığı','text','']],['card']),
+            'stat_list'=>$this->d('Statistika','Məzmun',$main,[['title','Bölmə başlığı','text','']],['stat']),
+            'faq'=>$this->d('FAQ','Məzmun',$main,[['title','Bölmə başlığı','text','']],['faq_item']),
+            'cta'=>$this->d('Çağırış bloku','Məzmun',$main,[['title','Başlıq','text',''],['text','Mətn','textarea',''],['button_text','Düymə mətni','text',''],['button_url','Düymə linki','url','']]),
+            'video_embed'=>$this->d('Video','Media',$main,[['title','Başlıq','text',''],['url','YouTube/Vimeo linki','video_url',''],['caption','Açıqlama','textarea','']]),
+            'gallery'=>$this->d('Şəkil qalereyası','Media',$main,[['title','Başlıq','text','']],['gallery_item']),
+            'button_group'=>$this->d('Düymə qrupu','Məzmun',$main,[],['button']),
+            'spacer'=>$this->d('Boşluq','Layout',$main,[['height','Hündürlük','number',48,8,240]]),'divider'=>$this->d('Ayırıcı xətt','Layout',$main,[]),'group'=>$this->d('Blok qrupu','Layout',$main,[],$children,['default']),'columns'=>$this->d('Sütunlar','Layout',$main,[['columns','Sütun sayı','select','2',['2','3']]],$children,['column_1','column_2','column_3']),
+            'article_listing'=>$this->d('Məqalələr siyahısı','Dinamik',$main,[['title','Başlıq','text',''],['limit','Maksimum say','number',12,1,48]]),'article_archive'=>$this->d('Akademik yazılar arxivi','Dinamik',$main,[['title','Başlıq','text',''],['intro','Giriş mətni','textarea',''],['limit','Kateqoriya üzrə limit','number',12,1,48]]),'article_detail'=>$this->d('Məqalə detalı','Dinamik',$main,[['show_cover','Cover şəkli göstər','checkbox',true],['show_meta','Metadata göstər','checkbox',true],['show_category','Kateqoriya göstər','checkbox',true]]),
+            'training_listing'=>$this->d('Təlimlər siyahısı','Dinamik',$main,[['title','Başlıq','text',''],['limit','Maksimum say','number',6,1,48]]),'category_listing'=>$this->d('Kateqoriyalar','Dinamik',$main,[['title','Başlıq','text',''],['limit','Limit','number',6,1,24]]),'feature_listing'=>$this->d('Akademik imkanlar','Dinamik',$main,[['title','Başlıq','text',''],['show_support','Dəstək blokunu göstər','checkbox',true]]),'partner_listing'=>$this->d('Tərəfdaşlar','Dinamik',$main,[['title','Başlıq','text',''],['subtitle','Alt başlıq','textarea',''],['limit','Limit','number',20,1,60]]),'advertisement_listing'=>$this->d('Reklamlar','Dinamik',$main,[['position','Mövqe','select','bottom',['sidebar','bottom']],['limit','Limit','number',4,1,24]]),'gallery_listing'=>$this->d('Qalereya','Dinamik',$main,[['title','Başlıq','text',''],['intro','Giriş mətni','textarea',''],['columns','Sütun sayı','select','4',['2','3','4']]]),'certificate_lookup'=>$this->d('Sertifikat doğrulama','Dinamik',$main,[['title','Başlıq','text',''],['subtitle','Alt başlıq','textarea',''],['show_points','Məlumat nişanlarını göstər','checkbox',true]]),'profile_card'=>$this->d('Profil kartı','Dinamik',$main,[['title','Başlıq override','text',''],['show_email','E-mail göstər','checkbox',true],['show_logout','Çıxışı göstər','checkbox',true]]),'contact_info'=>$this->d('Əlaqə məlumatı','Dinamik',$main,[['title','Başlıq','text',''],['html','Mətn','rich_text','']]),'contact_form'=>$this->d('Əlaqə formu','Dinamik',$main,[['title','Başlıq','text',''],['text','Açıqlama','textarea','']]),'map_embed'=>$this->d('Xəritə','Dinamik',$main,[['title','Başlıq','text',''],['embed_url','Embed linki','url','']]),
         ];
     }
-
-    public function component(string $kind, string $type): ?array
-    {
-        return ($kind === 'section' ? $this->sections() : $this->blocks())[$type] ?? null;
-    }
-
-    public function defaultDocument(string $pageKey): array
-    {
-        $node = fn (string $type, array $settings = [], array $blocks = [], array $order = [], string $slot = 'default'): array => [
-            'type' => $type,
-            '_name' => null,
-            'disabled' => false,
-            'slot_key' => $slot,
-            'settings' => array_merge($this->defaultsFor($type, 'section') ?: $this->defaultsFor($type, 'block'), $settings),
-            'blocks' => $blocks,
-            'order' => $order,
-        ];
-        $id = fn (string $seed): string => $seed.'_'.substr(hash('sha256', $pageKey.'|'.$seed), 0, 12);
-        $main = ['sections' => [], 'order' => []];
-
-        if ($pageKey === '__header') {
-            $key = $id('header');
-            $main['sections'][$key] = $node('site_header');
-            $main['order'][] = $key;
-        } elseif ($pageKey === '__footer') {
-            $key = $id('footer');
-            $main['sections'][$key] = $node('site_footer');
-            $main['order'][] = $key;
-        } elseif ($pageKey === 'index') {
-            $hero = $id('home_hero');
-            $grid = $id('home_content_grid');
-            $journal = $id('home_journal');
-            $articles = $id('article_listing');
-            $trainings = $id('training_listing');
-            $features = $id('feature_listing');
-            $partners = $id('partner_listing');
-            $ads = $id('advertisement_listing');
-            $main['sections'][$hero] = $node('home_hero');
-            $main['sections'][$grid] = $node('home_content_grid', [], [
-                $journal => $node('home_journal', [], [], [], 'main'),
-                $articles => $node('article_listing', ['limit' => 12], [], [], 'main'),
-                $trainings => $node('training_listing', ['limit' => 6], [], [], 'main'),
-                $features => $node('feature_listing', [], [], [], 'main'),
-                $partners => $node('partner_listing', ['limit' => 20], [], [], 'main'),
-                $ads => $node('advertisement_listing', ['position' => 'sidebar', 'limit' => 4], [], [], 'sidebar'),
-            ], [$journal, $articles, $trainings, $features, $partners, $ads]);
-            $main['order'] = [$hero, $grid];
-        } else {
-            $type = match ($pageKey) {
-                'contact' => 'contact_grid',
-                'certificates' => 'certificate_lookup',
-                'gallery' => 'gallery_listing',
-                'trainings' => 'training_listing',
-                'articles' => 'article_archive',
-                'article_detail' => 'article_detail',
-                'profile' => 'profile_card',
-                default => 'page_content',
-            };
-            $key = $id($type);
-            $blocks = [];
-            $order = [];
-            if ($type === 'contact_grid') {
-                $info = $id('contact_info');
-                $form = $id('contact_form');
-                $blocks = [
-                    $info => $node('contact_info', [], [], [], 'info'),
-                    $form => $node('contact_form', [], [], [], 'form'),
-                ];
-                $order = [$info, $form];
-            }
-            $main['sections'][$key] = $node($type, [], $blocks, $order);
-            $main['order'][] = $key;
-        }
-
-        return [
-            'schema_version' => 1,
-            'layout' => [
-                'type' => 'alturamedix',
-                'header' => ['sections' => [], 'order' => []],
-                'footer' => ['sections' => [], 'order' => []],
-            ],
-            'sections' => $main['sections'],
-            'order' => $main['order'],
-        ];
-    }
-
-    public function defaultsFor(string $type, string $kind): array
-    {
-        $component = $this->component($kind, $type);
-        if (! $component) return [];
-        $defaults = [];
-        foreach ($component['fields'] as $key => $field) $defaults[$key] = $field['default'] ?? null;
-        return $defaults;
-    }
-
-    private function sections(): array
-    {
-        $content = $this->contentFields();
-        $mainOnly = ['main'];
-        return [
-            'site_header' => $this->componentDef('Alturamedix Header', 'Sistem', $mainOnly, [
-                $this->field('show_brand', 'Logo və brend', 'checkbox', true),
-                $this->field('show_languages', 'Dil seçimi', 'checkbox', true),
-                $this->field('show_social', 'Sosial linklər', 'checkbox', true),
-                $this->field('show_navigation', 'Əsas menyu', 'checkbox', true),
-                $this->field('show_auth', 'Giriş / qeydiyyat', 'checkbox', true),
-                $this->field('show_search', 'Axtarış', 'checkbox', true),
-            ], [], [], true),
-            'site_footer' => $this->componentDef('Alturamedix Footer', 'Sistem', $mainOnly, [
-                $this->field('show_about', 'Brend məlumatı', 'checkbox', true),
-                $this->field('show_links', 'Sürətli keçidlər', 'checkbox', true),
-                $this->field('show_contact', 'Əlaqə məlumatı', 'checkbox', true),
-                $this->field('show_newsletter', 'Bülleten', 'checkbox', true),
-                $this->field('copyright_text', 'Copyright mətni', 'text', ''),
-            ], [], [], true),
-            'home_hero' => $this->componentDef('Ana səhifə hero / slider', 'Ana səhifə', $mainOnly, [
-                $this->field('show_stats', 'Statistikaları göstər', 'checkbox', true),
-                $this->field('autoplay_ms', 'Slayd intervalı (ms)', 'number', 6200, min: 2500, max: 20000),
-            ]),
-            'home_content_grid' => $this->componentDef('Ana səhifə məzmun grid-i', 'Ana səhifə', $mainOnly, [], $this->contentBlockTypes(), ['main', 'sidebar']),
-            'contact_grid' => $this->componentDef('Əlaqə səhifəsi grid-i', 'Səhifə', $mainOnly, [], ['contact_info', 'contact_form', 'map_embed'], ['info', 'form']),
-            'page_content' => $this->componentDef('Standart səhifə məzmunu', 'Səhifə', $mainOnly, [
-                $this->field('title', 'Başlıq override', 'text', ''),
-                $this->field('subtitle', 'Alt başlıq override', 'textarea', ''),
-                $this->field('html', 'Mətn override', 'rich_text', ''),
-                $this->field('show_image', 'Əsas şəkli göstər', 'checkbox', true),
-            ]),
-            'article_archive' => $this->componentDef('Akademik yazılar arxivi', 'Dinamik', $mainOnly, [
-                $this->field('title', 'Başlıq', 'text', ''),
-                $this->field('intro', 'Giriş mətni', 'textarea', ''),
-                $this->field('limit', 'Kateqoriya üzrə limit', 'number', 12, min: 1, max: 48),
-            ]),
-            'article_detail' => $this->componentDef('Məqalə detalı', 'Dinamik', $mainOnly, [
-                $this->field('show_cover', 'Cover şəkli göstər', 'checkbox', true),
-                $this->field('show_meta', 'Metadata göstər', 'checkbox', true),
-                $this->field('show_category', 'Kateqoriya göstər', 'checkbox', true),
-            ]),
-            'certificate_lookup' => $this->componentDef('Sertifikat doğrulama', 'Dinamik', $mainOnly, [
-                $this->field('title', 'Başlıq', 'text', ''),
-                $this->field('subtitle', 'Alt başlıq', 'textarea', ''),
-                $this->field('show_points', 'Məlumat nişanlarını göstər', 'checkbox', true),
-            ]),
-            'gallery_listing' => $this->componentDef('Qalereya', 'Dinamik', $mainOnly, [
-                $this->field('title', 'Başlıq', 'text', ''),
-                $this->field('intro', 'Giriş mətni', 'textarea', ''),
-                $this->field('columns', 'Sütun sayı', 'select', '4', options: ['2', '3', '4']),
-            ]),
-            'training_listing' => $this->componentDef('Təlimlər siyahısı', 'Dinamik', $mainOnly, [
-                $this->field('title', 'Başlıq', 'text', ''),
-                $this->field('limit', 'Maksimum say', 'number', 6, min: 1, max: 48),
-            ]),
-            'profile_card' => $this->componentDef('Profil kartı', 'Dinamik', $mainOnly, [
-                $this->field('title', 'Başlıq override', 'text', ''),
-                $this->field('show_email', 'E-mail göstər', 'checkbox', true),
-                $this->field('show_logout', 'Çıxışı göstər', 'checkbox', true),
-            ]),
-            'rich_text' => $this->componentDef('Mətn', 'Məzmun', $mainOnly, $content['rich_text']),
-            'image_text' => $this->componentDef('Şəkil və mətn', 'Məzmun', $mainOnly, $content['image_text']),
-            'cards' => $this->componentDef('Kartlar', 'Məzmun', $mainOnly, $content['cards'], ['card']),
-            'stat_list' => $this->componentDef('Statistika', 'Məzmun', $mainOnly, $content['stat_list'], ['stat']),
-            'faq' => $this->componentDef('FAQ', 'Məzmun', $mainOnly, $content['faq'], ['faq_item']),
-            'cta' => $this->componentDef('Çağırış bloku', 'Məzmun', $mainOnly, $content['cta']),
-            'video_embed' => $this->componentDef('Video', 'Media', $mainOnly, $content['video_embed']),
-            'gallery' => $this->componentDef('Şəkil qalereyası', 'Media', $mainOnly, $content['gallery'], ['gallery_item']),
-            'button_group' => $this->componentDef('Düymə qrupu', 'Məzmun', $mainOnly, [], ['button']),
-            'spacer' => $this->componentDef('Boşluq', 'Layout', $mainOnly, [$this->field('height', 'Hündürlük', 'number', 48, min: 8, max: 240)]),
-            'divider' => $this->componentDef('Ayırıcı xətt', 'Layout', $mainOnly, []),
-            'group' => $this->componentDef('Blok qrupu', 'Layout', $mainOnly, [], $this->contentBlockTypes(), ['default']),
-            'columns' => $this->componentDef('Sütunlar', 'Layout', $mainOnly, [$this->field('columns', 'Sütun sayı', 'select', '2', options: ['2', '3'])], $this->contentBlockTypes(), ['column_1', 'column_2', 'column_3']),
-            'category_listing' => $this->componentDef('Kateqoriyalar', 'Dinamik', $mainOnly, [$this->field('title', 'Başlıq', 'text', ''), $this->field('limit', 'Limit', 'number', 6, min: 1, max: 24)]),
-            'feature_listing' => $this->componentDef('Akademik imkanlar', 'Dinamik', $mainOnly, [$this->field('title', 'Başlıq', 'text', ''), $this->field('show_support', 'Dəstək blokunu göstər', 'checkbox', true)]),
-            'partner_listing' => $this->componentDef('Tərəfdaşlar', 'Dinamik', $mainOnly, [$this->field('title', 'Başlıq', 'text', ''), $this->field('subtitle', 'Alt başlıq', 'textarea', ''), $this->field('limit', 'Limit', 'number', 20, min: 1, max: 60)]),
-            'advertisement_listing' => $this->componentDef('Reklamlar', 'Dinamik', $mainOnly, [$this->field('position', 'Mövqe', 'select', 'bottom', options: ['sidebar', 'bottom']), $this->field('limit', 'Limit', 'number', 4, min: 1, max: 24)]),
-            'contact_info' => $this->componentDef('Əlaqə məlumatı', 'Dinamik', $mainOnly, [$this->field('title', 'Başlıq', 'text', ''), $this->field('html', 'Mətn', 'rich_text', '')]),
-            'contact_form' => $this->componentDef('Əlaqə formu', 'Dinamik', $mainOnly, [$this->field('title', 'Başlıq', 'text', ''), $this->field('text', 'Açıqlama', 'textarea', '')]),
-            'map_embed' => $this->componentDef('Xəritə', 'Dinamik', $mainOnly, [$this->field('title', 'Başlıq', 'text', ''), $this->field('embed_url', 'Embed linki', 'url', '')]),
-            'home_journal' => $this->componentDef('MEDEPICENT Journal', 'Ana səhifə', $mainOnly, []),
-        ];
-    }
-
-    private function blocks(): array
-    {
-        $blocks = [];
-        foreach (['rich_text', 'image_text', 'cards', 'stat_list', 'faq', 'cta', 'video_embed', 'gallery', 'button_group', 'spacer', 'divider', 'group', 'columns', 'category_listing', 'feature_listing', 'partner_listing', 'advertisement_listing', 'contact_info', 'contact_form', 'map_embed', 'article_archive', 'article_detail', 'training_listing', 'gallery_listing', 'certificate_lookup', 'profile_card', 'page_content', 'home_journal'] as $type) {
-            $definition = $this->sections()[$type] ?? null;
-            if ($definition) {
-                $definition['zones'] = [];
-                $blocks[$type] = $definition;
-            }
-        }
-        $blocks['card'] = $this->componentDef('Kart elementi', 'Məzmun', [], [$this->field('title', 'Başlıq', 'text', ''), $this->field('text', 'Mətn', 'textarea', ''), $this->field('icon', 'İkon class', 'icon', ''), $this->field('url', 'Link', 'url', '')]);
-        $blocks['stat'] = $this->componentDef('Statistika elementi', 'Məzmun', [], [$this->field('value', 'Dəyər', 'text', ''), $this->field('title', 'Başlıq', 'text', ''), $this->field('icon', 'İkon class', 'icon', '')]);
-        $blocks['faq_item'] = $this->componentDef('FAQ elementi', 'Məzmun', [], [$this->field('title', 'Sual', 'text', ''), $this->field('text', 'Cavab', 'textarea', '')]);
-        $blocks['gallery_item'] = $this->componentDef('Qalereya şəkli', 'Media', [], [$this->field('asset_id', 'Şəkil', 'asset', null), $this->field('title', 'Başlıq', 'text', ''), $this->field('text', 'Açıqlama', 'textarea', '')]);
-        $blocks['button'] = $this->componentDef('Düymə', 'Məzmun', [], [$this->field('title', 'Mətn', 'text', ''), $this->field('url', 'Link', 'url', ''), $this->field('style', 'Stil', 'select', 'primary', options: ['primary', 'light', 'dark'])]);
-        return $blocks;
-    }
-
-    private function contentFields(): array
-    {
-        return [
-            'rich_text' => [$this->field('title', 'Başlıq', 'text', ''), $this->field('html', 'Mətn', 'rich_text', '')],
-            'image_text' => [$this->field('eyebrow', 'Üst başlıq', 'text', ''), $this->field('title', 'Başlıq', 'text', ''), $this->field('html', 'Mətn', 'rich_text', ''), $this->field('image_path', 'Şəkil URL', 'url', ''), $this->field('button_text', 'Düymə mətni', 'text', ''), $this->field('button_url', 'Düymə linki', 'url', '')],
-            'cards' => [$this->field('title', 'Bölmə başlığı', 'text', '')],
-            'stat_list' => [$this->field('title', 'Bölmə başlığı', 'text', '')],
-            'faq' => [$this->field('title', 'Bölmə başlığı', 'text', '')],
-            'cta' => [$this->field('title', 'Başlıq', 'text', ''), $this->field('text', 'Mətn', 'textarea', ''), $this->field('button_text', 'Düymə mətni', 'text', ''), $this->field('button_url', 'Düymə linki', 'url', '')],
-            'video_embed' => [$this->field('title', 'Başlıq', 'text', ''), $this->field('url', 'YouTube/Vimeo linki', 'video_url', ''), $this->field('caption', 'Açıqlama', 'textarea', '')],
-            'gallery' => [$this->field('title', 'Başlıq', 'text', '')],
-        ];
-    }
-
-    private function contentBlockTypes(): array
-    {
-        return ['rich_text', 'image_text', 'cards', 'stat_list', 'faq', 'cta', 'video_embed', 'gallery', 'button_group', 'spacer', 'divider', 'group', 'columns', 'article_archive', 'article_detail', 'training_listing', 'gallery_listing', 'certificate_lookup', 'profile_card', 'page_content', 'category_listing', 'feature_listing', 'partner_listing', 'advertisement_listing', 'contact_info', 'contact_form', 'map_embed', 'home_journal'];
-    }
-
-    private function componentDef(string $label, string $category, array $zones, array $fields, array $blocks = [], array $slots = [], bool $system = false): array
-    {
-        return ['label' => $label, 'category' => $category, 'zones' => $zones, 'fields' => collect($fields)->keyBy('key')->all(), 'blocks' => $blocks, 'slots' => $slots, 'system' => $system];
-    }
-
-    private function field(string $key, string $label, string $type, mixed $default = null, array $options = [], ?int $min = null, ?int $max = null): array
-    {
-        return array_filter(compact('key', 'label', 'type', 'default', 'options', 'min', 'max'), fn ($value, $name) => $name === 'default' || $value !== null && $value !== [], ARRAY_FILTER_USE_BOTH);
-    }
+    private function blocks():array{$out=[];foreach($this->sections() as $type=>$d){if(in_array($type,['site_header','site_footer','home_hero','home_content_grid','contact_grid'],true))continue;$d['zones']=[];$out[$type]=$d;}$out['card']=$this->d('Kart elementi','Məzmun',[],[['title','Başlıq','text',''],['text','Mətn','textarea',''],['icon','İkon class','icon',''],['url','Link','url','']]);$out['stat']=$this->d('Statistika elementi','Məzmun',[],[['value','Dəyər','text',''],['title','Başlıq','text',''],['icon','İkon class','icon','']]);$out['faq_item']=$this->d('FAQ elementi','Məzmun',[],[['title','Sual','text',''],['text','Cavab','textarea','']]);$out['gallery_item']=$this->d('Qalereya şəkli','Media',[],[['asset_id','Şəkil','asset',null],['title','Başlıq','text',''],['text','Açıqlama','textarea','']]);$out['button']=$this->d('Düymə','Məzmun',[],[['title','Mətn','text',''],['url','Link','url',''],['style','Stil','select','primary',['primary','light','dark']]]);return $out;}
+    private function childTypes():array{return ['rich_text','image_text','cards','stat_list','faq','cta','video_embed','gallery','button_group','spacer','divider','group','columns','article_listing','article_archive','article_detail','training_listing','gallery_listing','certificate_lookup','profile_card','page_content','category_listing','feature_listing','partner_listing','advertisement_listing','contact_info','contact_form','map_embed','home_journal'];}
+    private function d(string $label,string $category,array $zones,array $rows,array $blocks=[],array $slots=[],bool $system=false):array{$fields=[];foreach($rows as $r){$f=['key'=>$r[0],'label'=>$r[1],'type'=>$r[2],'default'=>$r[3]];if(isset($r[4])&&is_array($r[4]))$f['options']=$r[4];if(isset($r[4])&&is_int($r[4])){$f['min']=$r[4];$f['max']=$r[5];}$fields[$r[0]]=$f;}return compact('label','category','zones','fields','blocks','slots','system');}
 }
