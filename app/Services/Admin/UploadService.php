@@ -18,8 +18,13 @@ class UploadService
         }
 
         $allowed = [
-            'jpg' => ['image/jpeg'], 'jpeg' => ['image/jpeg'], 'png' => ['image/png'],
-            'webp' => ['image/webp'], 'gif' => ['image/gif'], 'svg' => ['image/svg+xml', 'text/plain', 'text/xml'],
+            'jpg' => ['image/jpeg', 'image/pjpeg'],
+            'jpeg' => ['image/jpeg', 'image/pjpeg'],
+            'png' => ['image/png'],
+            'webp' => ['image/webp'],
+            'gif' => ['image/gif'],
+            // SVG is parsed and sanitized below. Some Windows/PHP setups detect a valid SVG as octet-stream.
+            'svg' => ['image/svg+xml', 'text/plain', 'text/xml', 'application/octet-stream'],
             'pdf' => ['application/pdf'],
         ];
         $extension = strtolower($file->getClientOriginalExtension());
@@ -39,8 +44,12 @@ class UploadService
 
         $directory = public_path('uploads/'.trim($folder, '/'));
 
-        if (! is_dir($directory)) {
-            mkdir($directory, 0775, true);
+        if (! is_dir($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
+            return null;
+        }
+
+        if (! is_writable($directory)) {
+            return null;
         }
 
         $filename = now()->format('YmdHis').'_'.Str::random(12).'.'.$extension;
