@@ -27,7 +27,7 @@ final class AlturaComponentCatalog
             'page_content'=>$this->d('Standart səhifə məzmunu','Səhifə',$main,[['title','Başlıq override','text',''],['subtitle','Alt başlıq override','textarea',''],['html','Mətn override','rich_text',''],['show_image','Əsas şəkli göstər','checkbox',true]]),
             'contact_grid'=>$this->d('Əlaqə səhifəsi grid-i','Səhifə',$main,[],['contact_info','contact_form','map_embed'],['info','form']),
             'rich_text'=>$this->d('Mətn','Məzmun',$main,[['title','Başlıq','text',''],['html','Mətn','rich_text','']]),
-            'image_text'=>$this->d('Şəkil və mətn','Məzmun',$main,[['eyebrow','Üst başlıq','text',''],['title','Başlıq','text',''],['html','Mətn','rich_text',''],['image_path','Şəkil URL','url',''],['button_text','Düymə mətni','text',''],['button_url','Düymə linki','url','']]),
+            'image_text'=>$this->d('Şəkil və mətn','Məzmun',$main,[['eyebrow','Üst başlıq','text',''],['title','Başlıq','text',''],['html','Mətn','rich_text',''],['image_asset_id','Media kitabxanası','asset',null],['image_path','Xarici şəkil URL','url',''],['button_text','Düymə mətni','text',''],['button_url','Düymə linki','url','']]),
             'cards'=>$this->d('Kartlar','Məzmun',$main,[['title','Bölmə başlığı','text','']],['card']),
             'stat_list'=>$this->d('Statistika','Məzmun',$main,[['title','Bölmə başlığı','text','']],['stat']),
             'faq'=>$this->d('FAQ','Məzmun',$main,[['title','Bölmə başlığı','text','']],['faq_item']),
