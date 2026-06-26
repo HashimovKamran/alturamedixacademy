@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/page-editor', [PageBuilderController::class, 'index'])->middleware('admin.role:super_admin,designer,editor,publisher')->name('page-builder.index');
 Route::get('/page-editor/canvas', [PageBuilderController::class, 'canvas'])->middleware('admin.role:super_admin,designer,editor,publisher')->name('page-builder.canvas');
+Route::redirect('/live-editor', '/admin/page-editor')->name('visual-editor.index');
+
 Route::prefix('/page-editor/api')->name('page-builder.api.')->group(function (): void {
     Route::get('/bootstrap', [PageBuilderApiController::class, 'bootstrap'])->middleware('admin.role:super_admin,designer,editor,publisher')->name('bootstrap');
     Route::get('/pages', [PageBuilderApiController::class, 'pages'])->middleware('admin.role:super_admin,designer,editor,publisher')->name('pages');
