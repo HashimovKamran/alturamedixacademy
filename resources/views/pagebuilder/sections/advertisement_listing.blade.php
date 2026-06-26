@@ -4,6 +4,12 @@
     $items = \App\Models\Advertisement::query()->forLanguage($lang)->active()->where('position_key', $position)->orderBy('sort_order')->limit(max(1, (int) ($content['limit'] ?? 4)))->get();
 @endphp
 @if($position === 'sidebar')
+    <style>
+        body.aa-home-page .aa-sidebar-ads{display:grid;gap:10px}
+        body.aa-home-page .aa-sidebar-ad{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:72px;padding:12px 14px;border:1px solid #e6edf5;border-radius:10px;background:#fff;color:#21354e;text-decoration:none}
+        body.aa-home-page .aa-sidebar-ad span{display:grid;gap:3px;max-width:150px}body.aa-home-page .aa-sidebar-ad small{color:#8291a5;font-size:9px;font-weight:800}body.aa-home-page .aa-sidebar-ad strong{font-size:10px;line-height:1.4}
+        body.aa-home-page .aa-sidebar-ad img{width:58px;height:46px;object-fit:cover;border-radius:7px}body.aa-home-page .aa-sidebar-ad>i{display:grid;place-items:center;width:46px;height:42px;border-radius:7px;background:#f0efff;color:#a3a0e5;font-size:22px}
+    </style>
     <section class="aa-sidebar-ads">
         @forelse($items as $item)
             <a href="{{ \App\Support\Cms\SafeUrl::clean($item->url ?: '#') }}" class="aa-sidebar-ad">
