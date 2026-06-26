@@ -1,7 +1,9 @@
 @pbSchema(['name' => 'site_footer.blade'])
 @php
     $enabled = fn(string $key) => \App\Support\Cms\NativeBlockOptions::enabled($content, $key);
-    $footerLogo = trim((string)$block->image_path) ?: $logoImage;
+    // Keep the public brand logo controlled from Settings. The block image is only a legacy fallback.
+    $settingsLogo = trim((string) ($siteSettings['header_logo_image'] ?? '')) ?: trim((string) ($logoImage ?? ''));
+    $footerLogo = $settingsLogo !== '' ? $settingsLogo : trim((string) $block->image_path);
     $settings = array_merge($settings, $siteSettings);
 @endphp
 <footer class="site-footer" data-block-uuid="{{ $block->block_uuid }}">
