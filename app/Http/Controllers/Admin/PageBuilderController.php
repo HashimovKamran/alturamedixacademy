@@ -15,8 +15,9 @@ final class PageBuilderController extends Controller
         $language = AdminLanguage::selected($request);
         $pageKey = preg_replace('/[^a-z0-9_-]/', '', strtolower((string) $request->query('page', 'index'))) ?: 'index';
         $page = $builder->bootstrap($language, $pageKey)['page'];
+        $pages = $builder->pageList($language);
 
-        return view('admin.page_builder.react', compact('language', 'pageKey', 'page'));
+        return view('admin.page_builder.react', compact('language', 'pageKey', 'page', 'pages'));
     }
 
     public function canvas(Request $request): View
