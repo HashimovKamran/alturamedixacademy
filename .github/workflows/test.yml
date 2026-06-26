@@ -8,11 +8,13 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: sqlite3, mbstring, dom
+          extensions: sqlite3, mbstring, dom, xml, curl, zip, gd, intl
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: composer install --no-interaction --prefer-dist
+      - run: php -v && php -m && composer --version
+      - run: composer validate --no-check-publish
+      - run: composer install --no-interaction --prefer-dist --no-progress
       - run: npm install --no-audit --no-fund
       - run: npm run build
       - run: php artisan test --configuration=phpunit.visual.xml
