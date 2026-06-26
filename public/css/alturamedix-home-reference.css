@@ -7,6 +7,7 @@
 }
 /* Uploaded brand assets must render exactly as saved in Admin Settings. */
 .aa-home-page .aa-brand .brand-logo img{filter:none!important}
+.aa-home-page .aa-hero-logo-watermark{position:absolute;z-index:2;top:150px;left:80px;width:min(250px,24vw);max-height:168px;object-fit:contain;opacity:.09;pointer-events:none}
 .aa-home-page .aa-header-inner{min-height:82px;gap:26px}
 .aa-home-page .aa-brand .brand-logo{width:52px;height:52px}
 .aa-home-page .aa-brand .brand-text strong{font-size:16px}
@@ -57,10 +58,12 @@
     .aa-home-page .aa-header-inner{min-height:76px}
     .aa-home-page .aa-main-nav{top:76px}
     .aa-home-page .aa-hero-container{padding-left:62px}
+    .aa-home-page .aa-hero-logo-watermark{left:54px;top:150px;width:180px}
     .aa-home-page .aa-home-grid{grid-template-columns:1fr}
 }
 @media(max-width:680px){
     .aa-home-page .container{width:calc(100% - 30px)!important}
+    .aa-home-page .aa-hero-logo-watermark{display:none}
     .aa-home-page .aa-category-image{height:112px}
     .aa-home-page .aa-article-image{height:100%}
     .aa-home-page .aa-training-cover{width:106px;height:106px}
