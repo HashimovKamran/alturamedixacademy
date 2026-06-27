@@ -1,0 +1,25 @@
+/* Bione-style WebGL water refraction: the plugin renders the hero image inside its canvas. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    body.aa-home-page .aa-hero-art.aa-bione-ripples {
+        isolation: isolate;
+        overflow: hidden;
+        z-index: 1 !important;
+    }
+
+    /* The jquery-ripples canvas is intentionally behind this overlay and replaces the CSS photo. */
+    body.aa-home-page .aa-hero-art.aa-bione-ripples > canvas {
+        width: 100% !important;
+        height: 100% !important;
+        pointer-events: none !important;
+    }
+
+    /* Keep the existing dark left-side readability gradient after jquery-ripples hides background-image. */
+    body.aa-home-page .aa-hero-art.aa-bione-ripples::after {
+        content: "";
+        position: absolute;
+        z-index: 0;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(90deg, rgba(1, 15, 30, .97) 0%, rgba(1, 15, 30, .88) 35%, rgba(1, 15, 30, .16) 75%, rgba(1, 15, 30, .36) 100%);
+    }
+}
