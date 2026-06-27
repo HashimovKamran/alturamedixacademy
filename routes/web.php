@@ -20,6 +20,7 @@ use App\Http\Controllers\Public\SearchController;
 use App\Http\Controllers\Public\SiteAuthController;
 use App\Http\Controllers\Public\SitemapController;
 use App\Http\Controllers\Public\TrainingController;
+use App\Http\Middleware\EnableCategoryRasterImagePicker;
 use App\Http\Middleware\EnsureAdminAuthenticated;
 use Illuminate\Support\Facades\Route;
 
@@ -89,7 +90,10 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         require __DIR__.'/admin-page-builder-react.php';
 
         Route::post('/articles/{article}/notify', [ContentModuleController::class, 'notifyArticle'])->middleware('admin.role:super_admin,publisher')->name('articles.notify');
-        Route::get('/{module}', [ContentModuleController::class, 'index'])->middleware('admin.role:super_admin,designer,editor,publisher')->where('module', '[A-Za-z0-9_-]+')->name('modules.index');
+        Route::get('/{module}', [ContentModuleController::class, 'index'])
+            ->middleware(['admin.role:super_admin,designer,editor,publisher', EnableCategoryRasterImagePicker::class])
+            ->where('module', '[A-Za-z0-9_-]+')
+            ->name('modules.index');
         Route::post('/{module}/sort', [ContentModuleController::class, 'sort'])->middleware('admin.role:super_admin,editor,publisher')->where('module', '[A-Za-z0-9_-]+')->name('modules.sort');
         Route::post('/{module}', [ContentModuleController::class, 'store'])->middleware('admin.role:super_admin,editor,publisher')->where('module', '[A-Za-z0-9_-]+')->name('modules.store');
         Route::delete('/{module}/{id}', [ContentModuleController::class, 'destroy'])->middleware('admin.role:super_admin,publisher')->where('module', '[A-Za-z0-9_-]+')->name('modules.destroy');
