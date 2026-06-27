@@ -9,19 +9,22 @@ use App\Services\Admin\UploadService;
 use App\Support\Admin\AdminLanguage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
+    private const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
     public function store(Request $request, UploadService $uploads, AdminLogService $logs): RedirectResponse
     {
+        // Do not attach Laravel's generic `file` rule here. When PHP rejects an upload
+        // before the controller runs, that rule only produces the opaque `validation.uploaded` key.
         $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'category_visual_type' => ['nullable', 'in:icon,image'],
-            'image_path' => ['nullable', 'file', 'max:5120'],
         ], [
             'title.required' => 'Kateqoriya başlığı mütləqdir.',
-            'image_path.max' => 'Kateqoriya şəkli maksimum 5 MB olmalıdır.',
         ]);
 
         $language = AdminLanguage::selected($request);
@@ -64,13 +67,18 @@ class CategoryController extends Controller
             $data['image_path'] = null;
         } else {
             $imagePath = trim((string) $category->image_path);
+            /** @var UploadedFile|null $file */
+            $file = $request->file('image_path');
 
-            if ($request->hasFile('image_path')) {
-                $file = $request->file('image_path');
-                $extension = strtolower((string) $file?->getClientOriginalExtension());
+            if ($file !== null) {
+                $uploadError = $this->uploadErrorMessage($file);
+                if ($uploadError !== null) {
+                    return back()->withErrors(['image_path' => $uploadError])->withInput();
+                }
+
+                $extension = strtolower((string) $file->getClientOriginalExtension());
                 $allowedExtensions = ['svg', 'png', 'jpg', 'jpeg', 'webp'];
-
-                if (! $file || ! $file->isValid() || ! in_array($extension, $allowedExtensions, true)) {
+                if (! in_array($extension, $allowedExtensions, true)) {
                     return back()->withErrors([
                         'image_path' => 'Kateqoriya şəkli SVG, PNG, JPG/JPEG və ya WEBP formatında olmalıdır.',
                     ])->withInput();
@@ -79,7 +87,7 @@ class CategoryController extends Controller
                 $uploadedPath = $uploads->store($file, 'categories');
                 if ($uploadedPath === null) {
                     return back()->withErrors([
-                        'image_path' => 'Kateqoriya şəkli yüklənmədi. SVG, PNG, JPG/JPEG və ya WEBP formatında, maksimum 5 MB olan etibarlı fayl seçin.',
+                        'image_path' => 'Kateqoriya şəkli serverə yazıla bilmədi. uploads/categories qovluğunun yazma icazəsini və PHP upload limitlərini yoxlayın.',
                     ])->withInput();
                 }
 
@@ -111,5 +119,27 @@ class CategoryController extends Controller
         return redirect()
             ->route('admin.modules.index', ['module' => 'categories'])
             ->with('status', 'Kateqoriya yadda saxlanıldı.');
+    }
+
+    private function uploadErrorMessage(UploadedFile $file): ?string
+    {
+        if ($file->isValid()) {
+            if ((int) $file->getSize() > self::MAX_IMAGE_BYTES) {
+                return 'Kateqoriya şəkli maksimum 5 MB olmalıdır.';
+            }
+
+            return null;
+        }
+
+        return match ($file->getError()) {
+            UPLOAD_ERR_INI_SIZE => 'Şəkil PHP upload_max_filesize limitini keçir. Serverdə upload_max_filesize dəyərini ən azı 10M edin.',
+            UPLOAD_ERR_FORM_SIZE => 'Şəkil formun icazə verdiyi ölçünü keçir. Maksimum 5 MB fayl seçin.',
+            UPLOAD_ERR_PARTIAL => 'Şəkil yarımçıq yükləndi. Faylı yenidən seçib təkrar yoxlayın.',
+            UPLOAD_ERR_NO_FILE => 'Kateqoriya üçün şəkil seçin.',
+            UPLOAD_ERR_NO_TMP_DIR => 'Serverin müvəqqəti upload qovluğu tapılmadı. PHP upload_tmp_dir parametrini yoxlayın.',
+            UPLOAD_ERR_CANT_WRITE => 'Server şəkli diskə yaza bilmədi. uploads/categories qovluğunun yazma icazəsini yoxlayın.',
+            UPLOAD_ERR_EXTENSION => 'Server extension-u şəkil uploadunu dayandırdı. PHP extension konfiqurasiyasını yoxlayın.',
+            default => 'Şəkil yüklənmədi. Serverin PHP upload limitlərini və müvəqqəti qovluq ayarlarını yoxlayın.',
+        };
     }
 }
