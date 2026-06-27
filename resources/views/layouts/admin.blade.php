@@ -81,9 +81,9 @@
         .card{background:var(--admin-card);border:1px solid var(--admin-line-2);border-radius:16px;padding:20px;box-shadow:0 14px 38px rgba(61,125,131,.055);margin-bottom:18px}
         .card h2{margin:0 0 16px;font-size:18px;font-weight:900;letter-spacing:-.02em;color:#111}
         .grid{display:grid;gap:16px}
-        .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-        .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
-        .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+        .grid-2{grid-template-columns:repeat(2,minmax(0,1fr)}
+        .grid-3{grid-template-columns:repeat(3,minmax(0,1fr)}
+        .grid-4{grid-template-columns:repeat(4,minmax(0,1fr)}
         .grid-4>.card{padding:16px}
         .grid-4>.card h2{margin-bottom:6px;font-size:27px;line-height:1;font-weight:900;letter-spacing:-.025em}
         label{display:block;margin:0 0 6px;font-size:12px;font-weight:900;color:#1f2327}
@@ -274,6 +274,7 @@
         });
     })();
 </script>
+<script src="{{ asset('js/admin-slug-generator.js') }}"></script>
 @stack('scripts')
 </body>
 </html>
