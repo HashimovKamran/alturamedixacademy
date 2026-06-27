@@ -1,10 +1,16 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PageBuilderApiController;
 use App\Http\Controllers\Admin\PageBuilderAssetController;
 use App\Http\Controllers\Admin\PageBuilderController;
 use App\Http\Middleware\EnsureVisualBuilderPayloadSize;
 use Illuminate\Support\Facades\Route;
+
+// Must be registered before the generic /{module} POST route in routes/web.php.
+Route::post('/categories', [CategoryController::class, 'store'])
+    ->middleware('admin.role:super_admin,designer,editor,publisher')
+    ->name('categories.store');
 
 Route::get('/page-editor', [PageBuilderController::class, 'index'])->middleware('admin.role:super_admin,designer,editor,publisher')->name('page-builder.index');
 Route::get('/page-editor/canvas', [PageBuilderController::class, 'canvas'])->middleware('admin.role:super_admin,designer,editor,publisher')->name('page-builder.canvas');
