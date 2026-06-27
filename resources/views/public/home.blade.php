@@ -5,6 +5,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/alturamedix-home-reference.css') }}">
+<link rel="stylesheet" href="{{ asset('css/alturamedix-home-final.css') }}">
 @endpush
 
 @section('content')
