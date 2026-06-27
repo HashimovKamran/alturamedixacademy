@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="{{ asset('css/alturamedix-home-slider-reference.css') }}">
 <link rel="stylesheet" href="{{ asset('css/alturamedix-home-ads-size.css') }}">
 <link rel="stylesheet" href="{{ asset('css/home-bione-water-ripples.css') }}">
+<link rel="stylesheet" href="{{ asset('css/alturamedix-home-partners-size.css') }}">
 @endpush
 
 @section('content')
