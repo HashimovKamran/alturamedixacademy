@@ -5,10 +5,10 @@
 @endphp
 @if($position === 'sidebar')
     <style>
-        body.aa-home-page .aa-sidebar-ads{display:grid;gap:10px}
-        body.aa-home-page .aa-sidebar-ad{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:72px;padding:12px 14px;border:1px solid #e6edf5;border-radius:10px;background:#fff;color:#21354e;text-decoration:none}
-        body.aa-home-page .aa-sidebar-ad span{display:grid;gap:3px;max-width:150px}body.aa-home-page .aa-sidebar-ad small{color:#8291a5;font-size:9px;font-weight:800}body.aa-home-page .aa-sidebar-ad strong{font-size:10px;line-height:1.4}
-        body.aa-home-page .aa-sidebar-ad img{width:58px;height:46px;object-fit:cover;border-radius:7px}body.aa-home-page .aa-sidebar-ad>i{display:grid;place-items:center;width:46px;height:42px;border-radius:7px;background:#f0efff;color:#a3a0e5;font-size:22px}
+        body.aa-home-page .aa-sidebar-ads{display:grid;gap:12px}
+        body.aa-home-page .aa-sidebar-ad{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:94px;padding:15px 16px;border:1px solid #e6edf5;border-radius:10px;background:#fff;color:#21354e;text-decoration:none}
+        body.aa-home-page .aa-sidebar-ad span{display:grid;gap:5px;max-width:165px}body.aa-home-page .aa-sidebar-ad small{color:#8291a5;font-size:9px;font-weight:800}body.aa-home-page .aa-sidebar-ad strong{font-size:11px;line-height:1.42}
+        body.aa-home-page .aa-sidebar-ad img{width:64px;height:56px;object-fit:cover;border-radius:8px}body.aa-home-page .aa-sidebar-ad>i{display:grid;place-items:center;width:54px;height:50px;border-radius:8px;background:#f0efff;color:#a3a0e5;font-size:24px}
     </style>
     <section class="aa-sidebar-ads">
         @forelse($items as $item)
