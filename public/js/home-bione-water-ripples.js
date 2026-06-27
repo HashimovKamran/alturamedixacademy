@@ -30,8 +30,8 @@
             $(art).ripples({
                 imageUrl,
                 resolution: 512,
-                dropRadius: 34,
-                perturbance: 0.04,
+                dropRadius: 30,
+                perturbance: 0.026,
                 // The text/CTA layer sits above the background. We manually forward coordinates from the slider below.
                 interactive: false,
                 crossOrigin: 'anonymous',
@@ -76,12 +76,12 @@
     // Forward them explicitly to the currently visible jquery-ripples canvas.
     slider.addEventListener('pointermove', (event) => {
         if (event.pointerType && event.pointerType !== 'mouse') return;
-        forwardDrop(event, 34, 0.055);
+        forwardDrop(event, 30, 0.036);
     }, { passive: true });
 
     slider.addEventListener('pointerdown', (event) => {
         if (event.pointerType && event.pointerType !== 'mouse') return;
-        forwardDrop(event, 52, 0.18, true);
+        forwardDrop(event, 46, 0.12, true);
     }, { passive: true });
 
     slider.addEventListener('mouseleave', () => {
