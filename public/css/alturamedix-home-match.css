@@ -32,3 +32,60 @@ body.aa-home-page .aa-hero-logo-watermark{left:106px!important;top:165px!importa
 body.aa-home-page .aa-hero-stats-wrap{left:76px!important;right:76px!important;bottom:36px!important}
 body.aa-home-page .aa-category-image{height:158px!important}body.aa-home-page .aa-article-image{height:195px!important}body.aa-home-page .aa-training-card{grid-template-columns:108px minmax(0,1fr)!important;min-height:108px!important}body.aa-home-page .aa-training-cover{width:108px!important;height:108px!important}
 }
+
+/* The opening fold is always exactly one viewport: fixed header overlays the hero and is part of that first screen. */
+@media (min-width:921px){
+  body.aa-home-page .aa-home-hero,
+  body.aa-home-page .hero-slider,
+  body.aa-home-page .hero-slide{
+    height:100vh!important;
+    height:100svh!important;
+    height:100dvh!important;
+    min-height:0!important;
+    max-height:100dvh!important;
+  }
+  body.aa-home-page .aa-hero-container{
+    box-sizing:border-box!important;
+    height:100%!important;
+    padding:calc(96px + clamp(18px,3.2vh,50px)) 0 calc(clamp(170px,22vh,230px)) 112px!important;
+    align-items:center!important;
+  }
+  body.aa-home-page .aa-hero-copy h1{font-size:clamp(46px,min(4.1vw,8.3vh),78px)!important}
+  body.aa-home-page .aa-hero-eyebrow{margin-bottom:clamp(11px,2vh,21px)!important}
+  body.aa-home-page .aa-hero-description{margin-top:clamp(11px,2vh,20px)!important}
+  body.aa-home-page .aa-hero-buttons{margin-top:clamp(17px,3vh,33px)!important}
+  body.aa-home-page .aa-hero-stats-wrap{bottom:clamp(24px,4.8vh,43px)!important}
+  body.aa-home-page .aa-hero-stats{min-height:clamp(96px,15vh,132px)!important}
+  body.aa-home-page .aa-hero-logo-watermark{top:calc(96px + clamp(35px,8vh,90px))!important}
+}
+
+@media (min-width:921px) and (max-height:760px){
+  body.aa-home-page .aa-header-inner{height:82px!important;min-height:82px!important}
+  body.aa-home-page .aa-site-header .brand-logo{width:56px!important;height:56px!important}
+  body.aa-home-page .aa-main-nav>a,body.aa-home-page .aa-main-nav .nav-link{padding-top:30px!important;padding-bottom:25px!important}
+  body.aa-home-page .aa-hero-container{padding:calc(82px + 18px) 0 168px 86px!important}
+  body.aa-home-page .aa-hero-copy{width:min(650px,52%)!important}
+  body.aa-home-page .aa-hero-copy h1{max-width:620px!important;font-size:clamp(43px,min(3.9vw,7.4vh),58px)!important;line-height:1.04!important}
+  body.aa-home-page .aa-hero-description{font-size:13px!important;line-height:1.5!important}
+  body.aa-home-page .aa-button{min-height:47px!important;font-size:12px!important}
+  body.aa-home-page .aa-hero-stats-wrap{left:62px!important;right:62px!important;bottom:21px!important}
+  body.aa-home-page .aa-hero-stats{min-height:92px!important}
+  body.aa-home-page .aa-stat-item{padding:0 28px!important}.aa-home-page .aa-stat-item>i{font-size:27px!important}.aa-home-page .aa-stat-item strong{font-size:20px!important}.aa-home-page .aa-stat-item small{font-size:10px!important}
+  body.aa-home-page .aa-hero-logo-watermark{left:86px!important;width:250px!important;max-height:175px!important}
+}
+
+@media (max-width:920px){
+  body.aa-home-page .aa-home-hero,
+  body.aa-home-page .hero-slider,
+  body.aa-home-page .hero-slide{
+    height:100vh!important;
+    height:100svh!important;
+    height:100dvh!important;
+    min-height:0!important;
+    max-height:100dvh!important;
+  }
+  body.aa-home-page .aa-hero-container{
+    box-sizing:border-box!important;
+    height:100%!important;
+  }
+}
