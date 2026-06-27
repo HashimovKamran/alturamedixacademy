@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="{{ asset('css/alturamedix-home-match.css') }}">
 <link rel="stylesheet" href="{{ asset('css/alturamedix-home-slider-reference.css') }}">
 <link rel="stylesheet" href="{{ asset('css/alturamedix-home-ads-size.css') }}">
+<link rel="stylesheet" href="{{ asset('css/home-water-ripple.css') }}">
 @endpush
 
 @section('content')
@@ -20,6 +21,7 @@ body.aa-home-page .aa-site-header .aa-search-label{display:none!important}
 @endsection
 
 @push('scripts')
+<script src="{{ asset('js/home-water-ripple.js') }}"></script>
 <script>
 (() => {
     const header = document.getElementById('siteHeader');
