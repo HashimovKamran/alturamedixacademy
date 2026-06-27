@@ -1,28 +1,146 @@
 @extends('layouts.public')
 
 @section('title', ($settings['section_academic'] ?? 'Akademik yazılar') . ' - ' . ($settings['site_name'] ?? 'ALTURAMEDIX ACADEMY'))
+@section('meta_description', $settings['site_description'] ?? '')
+
+@php
+    $pageTitle = $settings['section_academic'] ?? 'Akademik yazılar';
+    $articlesUrl = \App\Support\CleanUrl::to('articles', $lang);
+    $homeUrl = \App\Support\CleanUrl::to('/', $lang);
+    $articleUrl = fn ($article) => \App\Support\CleanUrl::to('article?slug='.urlencode($article->slug), $lang);
+    $heroArticle = $articles->getCollection()->first(fn ($article) => filled($article->cover_image)) ?: $popularArticles->first(fn ($article) => filled($article->cover_image));
+    $heroImage = $heroArticle?->cover_image ? asset(ltrim($heroArticle->cover_image, '/')) : '';
+    $dateFor = fn ($article) => $article->published_at ?: $article->created_at;
+    $excerptFor = fn ($article) => \Illuminate\Support\Str::limit(trim(strip_tags((string) ($article->excerpt ?: $article->body))), 190);
+    $categoryIcon = fn ($category) => $category->icon_class ?: 'fa-solid fa-book-medical';
+    $categoryUrl = fn ($slug = '') => $articlesUrl.($slug !== '' ? '?category='.urlencode($slug) : '');
+    $paginationStart = max(1, $articles->currentPage() - 2);
+    $paginationEnd = min($articles->lastPage(), $articles->currentPage() + 2);
+@endphp
 
 @push('styles')
-<style>
-    .academic-page{background:radial-gradient(circle at 20% 0%, rgba(255,138,28,.08), transparent 28%),linear-gradient(180deg,#f7fbff 0%,#f4f7fb 100%);min-height:680px;padding:42px 0 60px}
-    .academic-hero-mini{margin-bottom:26px}.academic-hero-mini-inner{background:linear-gradient(135deg, rgba(7,23,40,.96), rgba(8,40,70,.95)),radial-gradient(circle at 80% 20%, rgba(255,138,28,.22), transparent 28%);color:#fff;border-radius:28px;padding:34px 36px;box-shadow:0 24px 70px rgba(7,23,40,.16);overflow:hidden;position:relative}.academic-hero-mini-inner::after{content:"";position:absolute;width:260px;height:260px;right:-80px;top:-90px;border-radius:50%;background:rgba(255,255,255,.06)}.academic-hero-mini h1{margin:0;font-size:38px;line-height:1.15;font-weight:900;letter-spacing:-.03em;position:relative;z-index:2}.academic-hero-mini p{width:min(100%,760px);margin:12px 0 0;color:#d8e6f3;font-size:17px;line-height:1.75;font-weight:750;position:relative;z-index:2}
-    .academic-icons-card{background:#fff;border:1px solid #dbe4ee;border-radius:26px;box-shadow:0 20px 60px rgba(7,23,40,.07);padding:26px;animation:aaPageIntro .45s ease both}@keyframes aaPageIntro{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}.academic-icons-card h2{margin:0 0 18px;color:#071728;font-size:30px;line-height:1.2;font-weight:900;letter-spacing:-.025em}.academic-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0;border:1px solid #dbe4ee;border-radius:18px;overflow:hidden;background:#fff}.academic-icon-btn{min-height:118px;border:0;border-right:1px solid #dbe4ee;border-bottom:1px solid #dbe4ee;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#071728;text-align:center;transition:.22s ease;padding:16px 10px;position:relative;margin:0}.academic-icon-btn::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:4px;background:#ff8a1c;border-radius:999px 999px 0 0;transform:scaleX(0);transform-origin:center;transition:.22s ease}.academic-icon-btn i{font-size:34px;color:#0d3152;transition:.22s ease}.academic-icon-btn img{width:42px;height:42px;object-fit:contain;transition:.22s ease}.academic-icon-btn span{display:block;font-size:15px;line-height:1.25;font-weight:900}.academic-icon-btn:hover,.academic-icon-btn.active{background:#fff9f2;color:#ff8a1c}.academic-icon-btn:hover i,.academic-icon-btn.active i{color:#ff8a1c;transform:translateY(-2px) scale(1.07)}.academic-icon-btn:hover img,.academic-icon-btn.active img{transform:translateY(-2px) scale(1.07)}.academic-icon-btn:hover::after,.academic-icon-btn.active::after{transform:scaleX(1)}
-    .academic-icon-btn.is-last-row{border-bottom:0}
-    .academic-open-hint{margin:16px 0 0;color:#64748b;font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px}.academic-open-hint i{color:#ff8a1c}.academic-content-zone{margin-top:24px}.category-panel{display:none;background:#fff;border:1px solid #dbe4ee;border-radius:28px;box-shadow:0 24px 74px rgba(7,23,40,.09);overflow:hidden;animation:aaPanelOpen .34s ease both}.category-panel.active{display:block}@keyframes aaPanelOpen{from{opacity:0;transform:translateY(20px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}.category-panel-head{position:relative;overflow:hidden;background:linear-gradient(135deg,#071728,#0b2d4a);color:#fff;padding:20px 24px;display:flex;align-items:center;justify-content:flex-start;gap:18px}.category-panel-head::after{content:"";position:absolute;right:-42px;top:-78px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.07)}.category-panel-title{position:relative;z-index:2;display:flex;align-items:center;gap:14px;min-width:0}.category-panel-icon{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);flex:0 0 auto;color:#ff8a1c;overflow:hidden}.category-panel-icon i{font-size:27px}.category-panel-icon img{width:100%;height:100%;object-fit:contain;padding:10px}.category-panel-title h3{margin:0;font-size:25px;line-height:1.15;font-weight:950;letter-spacing:-.02em}.category-panel-title p{margin:4px 0 0;color:#d7e5f2;font-size:13px;font-weight:800}
-    .article-list{padding:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;background:linear-gradient(180deg,#fff 0%,#f8fbff 100%)}.article-card{height:100%;min-height:0;border:1px solid #dbe4ee;border-radius:22px;background:#fff;padding:16px;display:flex;flex-direction:column;color:#071728;transition:.22s ease}.article-card:hover{border-color:#ffc28a;box-shadow:0 18px 46px rgba(7,23,40,.09);transform:translateY(-2px)}.article-thumb{width:100%;height:150px;border-radius:18px;background:#edf3f8;overflow:hidden;display:grid;place-items:center;color:#b8c4d2;font-size:34px;flex:0 0 auto}.article-thumb img{width:100%;height:100%;object-fit:cover}.article-card-copy{min-width:0;padding-top:15px}.article-card h4{margin:0;color:#071728;font-size:19px;line-height:1.28;font-weight:950;letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.article-card p{margin:9px 0 0;color:#64748b;font-size:14px;line-height:1.55;font-weight:750;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.article-card-meta{margin-top:auto;padding-top:18px;display:flex;align-items:center;justify-content:space-between;gap:12px}.article-date{display:inline-flex;align-items:center;gap:6px;color:#39536a;font-size:13px;font-weight:900}.article-open{display:inline-flex;align-items:center;gap:8px;color:#ff8a1c;font-size:14px;font-weight:950;white-space:nowrap}.article-arrow{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:14px;background:#ff8a1c;transition:.22s ease}.article-card:hover .article-arrow{transform:translateX(2px)}.academic-empty{padding:30px;color:#64748b;font-weight:800;background:#f8fafc;border:1px dashed #c7d5e5;border-radius:18px;text-align:center}.academic-empty i{display:block;font-size:38px;color:#b9c5d3;margin-bottom:10px}
-    @media(max-width:1050px){.article-list{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}}@media(max-width:900px){.academic-hero-mini h1{font-size:32px}.category-panel-head{align-items:center}.article-thumb{height:138px}}@media(max-width:640px){.academic-page{padding:24px 0 44px}.academic-hero-mini-inner{padding:26px 22px;border-radius:22px}.academic-hero-mini h1{font-size:28px}.academic-icons-card{padding:18px;border-radius:22px}.academic-icons-card h2{font-size:25px}.academic-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.academic-icon-btn{min-height:108px}.category-panel-head{padding:18px;align-items:flex-start}.category-panel-title{align-items:flex-start}.category-panel-title h3{font-size:23px}.category-panel-icon{width:52px;height:52px}.article-list{padding:16px;grid-template-columns:1fr}.article-thumb{height:172px}.article-card{padding:14px}.article-card h4{font-size:18px}.article-card p{font-size:13px}.article-card-meta{align-items:center}.article-open{font-size:0;gap:0}.article-open .article-arrow{font-size:14px}}
-</style>
+<link rel="stylesheet" href="{{ asset('css/articles-page.css') }}">
 @endpush
 
 @section('content')
-@include('public.partials.composition')
-@endsection
+<main class="articles-page">
+    <section class="articles-hero" @if($heroImage) style="--articles-hero-image:url('{{ $heroImage }}')" @endif>
+        <div class="container articles-hero-inner">
+            <nav class="articles-breadcrumb" aria-label="Breadcrumb">
+                <a href="{{ $homeUrl }}">Ana səhifə</a><i class="fa-solid fa-chevron-right"></i><span>{{ $pageTitle }}</span>
+            </nav>
+            <div class="articles-hero-copy">
+                <h1>{{ $pageTitle }}</h1>
+                <p>{{ $settings['articles_intro'] ?? 'Təcili və kritik tibb sahəsində ən son tədqiqatlar, elmi məqalələr, icmallar və dəlillərə əsaslanan biliklər.' }}</p>
+            </div>
+            <form class="articles-filter-form" method="get" action="{{ $articlesUrl }}">
+                <label class="articles-search-field">
+                    <span class="sr-only">Məqalə axtarın</span>
+                    <input type="search" name="q" value="{{ $searchQuery }}" placeholder="Məqalə axtarın...">
+                    @if($selectedCategory)<input type="hidden" name="category" value="{{ $selectedCategory }}">@endif
+                    <input type="hidden" name="sort" value="{{ $selectedSort }}">
+                    <button type="submit" aria-label="Axtar"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </label>
+                <label class="articles-category-select">
+                    <span class="sr-only">Kateqoriya seçin</span>
+                    <select name="category" onchange="this.form.submit()">
+                        <option value="">Kateqoriya</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->slug }}" @selected($selectedCategory === $category->slug)>{{ $category->title }}</option>
+                        @endforeach
+                    </select>
+                </label>
+            </form>
+        </div>
+    </section>
 
-@push('scripts')
-<script>
-function closeAllAcademicPanels(){document.querySelectorAll('[data-category-panel]').forEach(panel=>panel.classList.remove('active'));document.querySelectorAll('[data-category-open]').forEach(btn=>btn.classList.remove('active'));}
-function openAcademicPanel(slug, shouldScroll){const panel=document.querySelector('[data-category-panel="'+slug+'"]');const button=document.querySelector('[data-category-open="'+slug+'"]');if(!panel||!button)return;closeAllAcademicPanels();panel.classList.add('active');button.classList.add('active');if(window.history&&window.history.pushState){const url=new URL(window.location.href);url.searchParams.set('category',slug);window.history.pushState({},'',url.toString());}if(shouldScroll)setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'start'}),90);}
-function syncAcademicIconRows(){const buttons=[...document.querySelectorAll('.academic-icon-btn')];if(!buttons.length)return;buttons.forEach(btn=>btn.classList.remove('is-last-row'));const maxTop=Math.max(...buttons.map(btn=>btn.offsetTop));buttons.forEach(btn=>{if(Math.abs(btn.offsetTop-maxTop)<2)btn.classList.add('is-last-row');});}
-document.addEventListener('DOMContentLoaded',function(){syncAcademicIconRows();window.addEventListener('resize',()=>window.requestAnimationFrame(syncAcademicIconRows));document.querySelectorAll('[data-category-open]').forEach(btn=>btn.addEventListener('click',()=>openAcademicPanel(btn.getAttribute('data-category-open'),true)));});
-</script>
-@endpush
+    <section class="articles-archive">
+        <div class="container articles-layout">
+            <div class="articles-main-column">
+                <div class="articles-toolbar">
+                    <p>Ümumi məqalə sayı: <strong>{{ $articles->total() }}</strong></p>
+                    <form method="get" action="{{ $articlesUrl }}" class="articles-sort-form">
+                        @if($searchQuery)<input type="hidden" name="q" value="{{ $searchQuery }}">@endif
+                        @if($selectedCategory)<input type="hidden" name="category" value="{{ $selectedCategory }}">@endif
+                        <select name="sort" onchange="this.form.submit()" aria-label="Sıralama">
+                            <option value="latest" @selected($selectedSort === 'latest')>Ən yenilər</option>
+                            <option value="oldest" @selected($selectedSort === 'oldest')>Ən köhnələr</option>
+                            <option value="title" @selected($selectedSort === 'title')>A-dan Z-yə</option>
+                        </select>
+                    </form>
+                </div>
+
+                <div class="articles-listing">
+                    @forelse($articles as $article)
+                        <article class="archive-article-card">
+                            <a href="{{ $articleUrl($article) }}" class="archive-article-cover">
+                                @if($article->cover_image)
+                                    <img src="{{ asset(ltrim($article->cover_image, '/')) }}" alt="{{ $article->title }}">
+                                @else
+                                    <span><i class="fa-regular fa-image"></i></span>
+                                @endif
+                            </a>
+                            <div class="archive-article-copy">
+                                <span class="archive-article-category">{{ $article->category?->title ?: 'Məqalə' }}</span>
+                                <h2><a href="{{ $articleUrl($article) }}">{{ $article->title }}</a></h2>
+                                <div class="archive-article-meta">
+                                    <span><i class="fa-regular fa-calendar"></i>{{ optional($dateFor($article))->format('d M Y') }}</span>
+                                    @if($article->author_name)<span><i class="fa-regular fa-user"></i>{{ $article->author_name }}</span>@endif
+                                </div>
+                                @if($excerptFor($article))<p>{{ $excerptFor($article) }}</p>@endif
+                                <a href="{{ $articleUrl($article) }}" class="archive-read-more">Davamını oxu <i class="fa-solid fa-arrow-right"></i></a>
+                            </div>
+                        </article>
+                    @empty
+                        <div class="archive-empty"><i class="fa-regular fa-folder-open"></i><strong>Nəticə tapılmadı</strong><span>Axtarış və ya kateqoriya filtrini dəyişərək yenidən yoxlayın.</span><a href="{{ $articlesUrl }}">Bütün məqalələri göstər</a></div>
+                    @endforelse
+                </div>
+
+                @if($articles->hasPages())
+                    <nav class="articles-pagination" aria-label="Səhifələmə">
+                        @if($articles->onFirstPage())<span class="is-disabled"><i class="fa-solid fa-chevron-left"></i></span>@else<a href="{{ $articles->previousPageUrl() }}" aria-label="Əvvəlki səhifə"><i class="fa-solid fa-chevron-left"></i></a>@endif
+                        @if($paginationStart > 1)<a href="{{ $articles->url(1) }}">1</a>@if($paginationStart > 2)<span class="is-dots">…</span>@endif@endif
+                        @for($page = $paginationStart; $page <= $paginationEnd; $page++)
+                            <a href="{{ $articles->url($page) }}" class="{{ $page === $articles->currentPage() ? 'is-active' : '' }}">{{ $page }}</a>
+                        @endfor
+                        @if($paginationEnd < $articles->lastPage())@if($paginationEnd < $articles->lastPage() - 1)<span class="is-dots">…</span>@endif<a href="{{ $articles->url($articles->lastPage()) }}">{{ $articles->lastPage() }}</a>@endif
+                        @if($articles->hasMorePages())<a href="{{ $articles->nextPageUrl() }}" aria-label="Növbəti səhifə"><i class="fa-solid fa-chevron-right"></i></a>@else<span class="is-disabled"><i class="fa-solid fa-chevron-right"></i></span>@endif
+                    </nav>
+                @endif
+            </div>
+
+            <aside class="articles-sidebar">
+                <section class="articles-side-card categories-side-card">
+                    <h2>Kateqoriyalar</h2>
+                    <a href="{{ $articlesUrl }}" class="side-category {{ $selectedCategory === '' ? 'is-active' : '' }}"><span><i class="fa-solid fa-layer-group"></i>Bütün məqalələr</span><b>{{ $categories->sum('articles_count') }}</b></a>
+                    @foreach($categories as $category)
+                        <a href="{{ $categoryUrl($category->slug) }}" class="side-category {{ $selectedCategory === $category->slug ? 'is-active' : '' }}"><span>@if($category->image_path)<img src="{{ asset(ltrim($category->image_path, '/')) }}" alt="">@else<i class="{{ $categoryIcon($category) }}"></i>@endif{{ $category->title }}</span><b>{{ $category->articles_count }}</b></a>
+                    @endforeach
+                </section>
+
+                <section class="articles-side-card popular-side-card">
+                    <h2>Ən son məqalələr</h2>
+                    <div class="popular-articles-list">
+                        @foreach($popularArticles as $article)
+                            <a href="{{ $articleUrl($article) }}" class="popular-article">
+                                <span class="popular-article-image">@if($article->cover_image)<img src="{{ asset(ltrim($article->cover_image, '/')) }}" alt="">@else<i class="fa-regular fa-image"></i>@endif</span>
+                                <span><strong>{{ $article->title }}</strong><small><i class="fa-regular fa-calendar"></i>{{ optional($dateFor($article))->format('d M Y') }}</small></span>
+                            </a>
+                        @endforeach
+                    </div>
+                </section>
+
+                <section class="articles-side-card articles-newsletter">
+                    <i class="fa-regular fa-paper-plane articles-newsletter-art" aria-hidden="true"></i>
+                    <h2>Yeniliklərdən xəbərdar olun</h2>
+                    <p>Yeni məqalə və yeniliklərdən ilk siz xəbərdar olun.</p>
+                    <form onsubmit="return false">
+                        <input type="email" placeholder="E-poçt ünvanınız" aria-label="E-poçt ünvanınız">
+                        <button type="submit">Abunə ol</button>
+                    </form>
+                </section>
+            </aside>
+        </div>
+    </section>
+</main>
+@endsection
