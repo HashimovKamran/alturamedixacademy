@@ -1,17 +1,7 @@
 @pbSchema(['name' => 'article_detail.blade'])
 @php
-    $showCover = \App\Support\Cms\NativeBlockOptions::enabled($content, 'show_cover');
-    $showMeta = \App\Support\Cms\NativeBlockOptions::enabled($content, 'show_meta');
-    $showCategory = \App\Support\Cms\NativeBlockOptions::enabled($content, 'show_category');
     $articlesUrl = \App\Support\CleanUrl::to('articles', $lang);
     $homeUrl = \App\Support\CleanUrl::to('/', $lang);
-    $publishedAt = $article ? ($article->published_at ?: $article->created_at) : null;
-    $bodyHtml = $article ? app(\App\Support\Cms\SafeHtml::class)->clean($article->body ?: '') : '';
-    $hasBody = trim(strip_tags($bodyHtml)) !== '';
-    $pageCount = $hasBody ? 2 : 1;
-    $authorName = trim((string) ($article?->author_name ?? ''));
-    $excerpt = trim(strip_tags((string) ($article?->excerpt ?? '')));
-    $categoryName = $article?->category?->title ?: 'Akademik məqalə';
 @endphp
 
 @if($article)
@@ -25,7 +15,7 @@
                 <strong>Məqalə</strong>
             </nav>
 
-            <section class="article-reader-shell" data-article-reader data-reader-pages="{{ $pageCount }}">
+            <section class="article-reader-shell" data-article-reader>
                 <div class="article-reader-toolbar">
                     <div class="reader-toolbar-left">
                         <a class="reader-toolbar-link" href="{{ $articlesUrl }}">
@@ -33,7 +23,7 @@
                             <span class="reader-toolbar-label">Geri qayıt</span>
                         </a>
                         <span class="reader-toolbar-divider" aria-hidden="true"></span>
-                        <span class="reader-toolbar-page-count" data-reader-count>1 / {{ $pageCount }}</span>
+                        <span class="reader-toolbar-page-count">1 / 1</span>
                     </div>
 
                     <div class="reader-toolbar-center">
@@ -61,59 +51,20 @@
 
                 <div class="article-reader-stage-wrap">
                     <div class="article-reader-stage" data-reader-stage>
-                        <article class="reader-page reader-cover-page">
-                            <div class="reader-cover-copy">
-                                <span class="reader-kicker">{{ $categoryName }}</span>
-                                <h1 data-entity="article" data-entity-id="{{ $article->id }}" data-entity-field="title">{{ $article->title }}</h1>
-
-                                @if($showMeta)
-                                    <p class="reader-authors">
-                                        {{ $authorName !== '' ? $authorName : ($settings['site_name'] ?? 'ALTURAMEDIX ACADEMY') }}
-                                    </p>
-                                    <div class="reader-affiliations">
-                                        @if($showCategory && $article->category)
-                                            <span><i class="fa-solid fa-circle"></i><span data-entity="category" data-entity-id="{{ $article->category->id }}" data-entity-field="title">{{ $article->category->title }}</span></span>
-                                        @endif
-                                        @if($publishedAt)
-                                            <span><i class="fa-solid fa-circle"></i>{{ optional($publishedAt)->format('d M Y') }}</span>
-                                        @endif
+                        <article class="reader-page reader-image-page">
+                            @if($article->cover_image)
+                                <img src="{{ asset(ltrim($article->cover_image, '/')) }}" alt="{{ $article->title }}">
+                            @else
+                                <div class="reader-image-empty">
+                                    <div>
+                                        <i class="fa-regular fa-image"></i>
+                                        <strong>Məqalə şəkli yüklənməyib</strong>
+                                        <span>Bu məqalə üçün admin paneldən şəkil əlavə edin.</span>
                                     </div>
-                                @endif
-
-                                @if($excerpt !== '')
-                                    <div class="reader-abstract">
-                                        <strong>Xülasə</strong>
-                                        {{ $excerpt }}
-                                    </div>
-                                @endif
-
-                                <p class="reader-keywords"><strong>Açar sözlər:</strong> {{ $categoryName }}, təcili tibb, akademik bilik, klinik yanaşma</p>
-                            </div>
-
-                            <div class="reader-cover-visual">
-                                @if($showCover && $article->cover_image)
-                                    <img src="{{ asset(ltrim($article->cover_image, '/')) }}" alt="{{ $article->title }}">
-                                @else
-                                    <span class="reader-cover-placeholder"><i class="fa-solid fa-book-medical"></i></span>
-                                @endif
-                                <span class="reader-cover-stamp"><i class="fa-regular fa-file-lines"></i>{{ $settings['site_name'] ?? 'ALTURAMEDIX ACADEMY' }}</span>
-                            </div>
-
+                                </div>
+                            @endif
                             <span class="reader-page-number">01</span>
                         </article>
-
-                        @if($hasBody)
-                            <article class="reader-page reader-content-page">
-                                <header class="reader-running-header">
-                                    <span>{{ $article->title }}</span>
-                                    <span>{{ $categoryName }}</span>
-                                </header>
-                                <div class="reader-prose" data-entity="article" data-entity-id="{{ $article->id }}" data-entity-field="body" data-entity-type="richtext">
-                                    {!! $bodyHtml !!}
-                                </div>
-                                <span class="reader-page-number">02</span>
-                            </article>
-                        @endif
                     </div>
                 </div>
             </section>
@@ -168,7 +119,7 @@
             toast?.classList.add('is-visible');
             window.setTimeout(() => toast?.classList.remove('is-visible'), 2500);
         } catch (error) {
-            // User-cancelled native share does not need an error message.
+            // Native share cancellation or clipboard denial needs no visible error.
         }
     });
 
