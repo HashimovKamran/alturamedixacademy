@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="{{ asset('css/alturamedix-home-reference.css') }}">
 <link rel="stylesheet" href="{{ asset('css/alturamedix-home-final.css') }}">
 <link rel="stylesheet" href="{{ asset('css/alturamedix-home-match.css') }}">
+<link rel="stylesheet" href="{{ asset('css/alturamedix-home-slider-reference.css') }}">
 @endpush
 
 @section('content')
