@@ -7,6 +7,7 @@
     $autoplay = max(2500, (int) ($content['autoplay_ms'] ?? 6200));
     $showStats = \App\Support\Cms\NativeBlockOptions::enabled($content, 'show_stats');
     $phone = trim((string) ($siteSettings['contact_phone'] ?? ''));
+    $visibleIndexCount = max(3, $sliders->count());
     $socials = [
         ['key' => 'social_instagram', 'icon' => 'fa-brands fa-instagram', 'label' => 'Instagram'],
         ['key' => 'social_youtube', 'icon' => 'fa-brands fa-youtube', 'label' => 'YouTube'],
@@ -45,7 +46,13 @@
                         </div>
                     </div>
                     <div class="aa-hero-index" aria-label="Slider sıra nömrələri">
-                        @foreach($sliders as $dotIndex => $dotSlider)<button type="button" class="{{ $dotIndex === 0 ? 'active' : '' }}" data-slider-dot="{{ $dotIndex }}"><span>{{ str_pad((string) ($dotIndex + 1), 2, '0', STR_PAD_LEFT) }}</span></button>@endforeach
+                        @for($dotIndex = 0; $dotIndex < $visibleIndexCount; $dotIndex++)
+                            @if($dotIndex < $sliders->count())
+                                <button type="button" class="{{ $dotIndex === 0 ? 'active' : '' }}" data-slider-dot="{{ $dotIndex }}"><span>{{ str_pad((string) ($dotIndex + 1), 2, '0', STR_PAD_LEFT) }}</span></button>
+                            @else
+                                <span class="aa-hero-index-placeholder" aria-hidden="true">{{ str_pad((string) ($dotIndex + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                            @endif
+                        @endfor
                     </div>
                 </div>
             </article>
