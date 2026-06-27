@@ -12,3 +12,19 @@
 @section('content')
 @include('public.partials.composition')
 @endsection
+
+@push('scripts')
+<script>
+(() => {
+    const header = document.getElementById('siteHeader');
+    if (!header) return;
+
+    const syncHeaderState = () => {
+        header.classList.toggle('aa-header-scrolled', window.scrollY > 10);
+    };
+
+    syncHeaderState();
+    window.addEventListener('scroll', syncHeaderState, { passive: true });
+})();
+</script>
+@endpush
