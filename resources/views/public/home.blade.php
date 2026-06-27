@@ -10,6 +10,10 @@
 @endpush
 
 @section('content')
+<style data-aa-home-header-actions>
+body.aa-home-page .aa-site-header .aa-search-button{width:34px!important;min-height:34px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important}
+body.aa-home-page .aa-site-header .aa-search-label{display:none!important}
+</style>
 @include('public.partials.composition')
 @endsection
 
