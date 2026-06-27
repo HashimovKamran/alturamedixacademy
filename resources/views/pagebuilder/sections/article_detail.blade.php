@@ -1,4 +1,5 @@
 @pbSchema(['name' => 'article_detail.blade'])
+<link rel="stylesheet" href="{{ asset('css/article-image-view.css') }}">
 @php
     $articlesUrl = \App\Support\CleanUrl::to('articles', $lang);
     $homeUrl = \App\Support\CleanUrl::to('/', $lang);
