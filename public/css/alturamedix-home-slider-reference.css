@@ -47,6 +47,14 @@
   body.aa-home-page .aa-stat-item>i{font-size:33px!important}
   body.aa-home-page .aa-stat-item strong{font-size:24px!important}
   body.aa-home-page .aa-stat-item small{font-size:12px!important}
+
+  /* Left rail: contact and social profiles occupy deliberately separate vertical groups. */
+  body.aa-home-page .aa-hero-rail{top:82px!important;bottom:24px!important;display:block!important;width:58px!important}
+  body.aa-home-page .aa-rail-contact{position:absolute;top:clamp(24px,3.5vh,38px);left:0;right:0;display:flex;flex-direction:column;align-items:center}
+  body.aa-home-page .aa-rail-contact .aa-rail-phone{display:block!important;min-height:112px!important;margin:0!important;white-space:nowrap}
+  body.aa-home-page .aa-rail-contact .aa-rail-phone-icon{margin:25px 0 0!important}
+  body.aa-home-page .aa-rail-socials{position:absolute;top:50%;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:11px}
+  body.aa-home-page .aa-rail-socials .aa-rail-icon{margin:0!important}
 }
 
 /* Keep the composition full-screen without making low-height laptop hero content collapse. */
@@ -65,4 +73,10 @@
   body.aa-home-page .aa-hero-stats{min-height:96px!important}
   body.aa-home-page .aa-stat-item{padding:0 25px!important}.aa-home-page .aa-stat-item>i{font-size:27px!important}.aa-home-page .aa-stat-item strong{font-size:20px!important}.aa-home-page .aa-stat-item small{font-size:10px!important}
   body.aa-home-page .aa-hero-logo-watermark{left:clamp(72px,7.8vw,120px)!important;top:132px!important;width:235px!important;max-height:155px!important}
+  body.aa-home-page .aa-rail-contact{top:22px!important}.aa-home-page .aa-rail-contact .aa-rail-phone{min-height:96px!important}.aa-home-page .aa-rail-contact .aa-rail-phone-icon{margin-top:18px!important}.aa-home-page .aa-rail-socials{top:49%!important;gap:8px!important}
+}
+
+/* On touch layouts retain the existing compact rail behavior without wrappers affecting flex placement. */
+@media (max-width:920px){
+  body.aa-home-page .aa-rail-contact,body.aa-home-page .aa-rail-socials{display:contents}
 }
