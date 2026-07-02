@@ -33,7 +33,6 @@
 @php
     $hiddenModuleUrls = [
         route('admin.modules.index', ['module' => 'pages']),
-        route('admin.modules.index', ['module' => 'stats']),
         route('admin.modules.index', ['module' => 'blocks']),
     ];
     $visibleStats = collect($stats)->reject(fn ($stat) => in_array($stat['url'] ?? null, $hiddenModuleUrls, true));

@@ -80,6 +80,7 @@ class ContentModuleRegistry
                 'title' => 'Ana səhifə statistikaları',
                 'model' => HomeStat::class,
                 'folder' => 'stats',
+                'order' => ['sort_order', 'asc'],
                 'fields' => [
                     'lang_code' => ['label' => 'Dil', 'type' => 'language'],
                     'icon_class' => ['label' => 'Icon class', 'type' => 'text'],
@@ -100,7 +101,7 @@ class ContentModuleRegistry
                     'title' => ['label' => 'Başlıq', 'type' => 'text', 'required' => true],
                     'slug' => ['label' => 'Slug', 'type' => 'slug'],
                     'icon_class' => ['label' => 'Vizual', 'type' => 'medical_icon'],
-                    'image_path' => ['label' => 'SVG şəkil', 'type' => 'svg_file'],
+                    'image_path' => ['label' => 'Şəkil (PNG, JPG, WEBP və ya SVG)', 'type' => 'file'],
                     'is_featured' => ['label' => 'Əsas səhifədə göstər', 'type' => 'checkbox'],
                     'sort_order' => ['label' => 'Sıra', 'type' => 'number', 'default' => 0],
                     'is_active' => ['label' => 'Status', 'type' => 'checkbox', 'default' => true],
@@ -137,13 +138,14 @@ class ContentModuleRegistry
                 'fields' => [
                     'lang_code' => ['label' => 'Dil', 'type' => 'language'],
                     'title' => ['label' => 'Başlıq', 'type' => 'text', 'required' => true],
+                    'cover_image' => ['label' => 'Kart şəkli', 'type' => 'file'],
                     'location' => ['label' => 'Məkan', 'type' => 'text'],
                     'training_date' => ['label' => 'Tarix', 'type' => 'date'],
                     'register_url' => ['label' => 'Qeydiyyat linki', 'type' => 'text'],
                     'sort_order' => ['label' => 'Sıra', 'type' => 'number', 'default' => 0],
                     'is_active' => ['label' => 'Status', 'type' => 'checkbox', 'default' => true],
                 ],
-                'columns' => ['title', 'location', 'training_date', 'sort_order', 'is_active'],
+                'columns' => ['title', 'cover_image', 'location', 'training_date', 'sort_order', 'is_active'],
             ],
             'features' => [
                 'title' => 'Akademik imkanlar',

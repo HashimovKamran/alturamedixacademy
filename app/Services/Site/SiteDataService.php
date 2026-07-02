@@ -2,6 +2,7 @@
 
 namespace App\Services\Site;
 
+use App\AlturaPageBuilder\Services\PublicVisualPageResolver;
 use App\Models\Advertisement;
 use App\Models\Article;
 use App\Models\ArticleCategory;
@@ -16,7 +17,6 @@ use App\Models\Partner;
 use App\Models\SiteUser;
 use App\Models\Slider;
 use App\Models\Training;
-use App\PageBuilder\Services\PageDocumentService;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -26,8 +26,7 @@ class SiteDataService
     public function __construct(
         private readonly LanguageService $languages,
         private readonly SettingService $settings,
-        private readonly PagePublicationService $publications,
-        private readonly PageDocumentService $documents,
+        private readonly PublicVisualPageResolver $visualDocuments,
     ) {}
 
     public function language(Request $request): string
@@ -45,8 +44,8 @@ class SiteDataService
             'settings' => $this->settings->all($language),
             'menus' => $this->menus($language),
             'currentUser' => $this->currentUser($request),
-            'headerBuilderBlocks' => $this->pageBuilderBlocks($language, '__header', $this->builderPreview($request)),
-            'footerBuilderBlocks' => $this->pageBuilderBlocks($language, '__footer', $this->builderPreview($request)),
+            'headerBuilderBlocks' => collect(),
+            'footerBuilderBlocks' => collect(),
             'headerBuilderDocument' => $this->pageBuilderDocument($language, '__header', $this->builderPreview($request)),
             'footerBuilderDocument' => $this->pageBuilderDocument($language, '__footer', $this->builderPreview($request)),
         ];
@@ -62,56 +61,34 @@ class SiteDataService
         return Menu::query()
             ->with(['children' => fn ($query) => $query->where('lang_code', $language)->active()->orderBy('sort_order')->orderBy('id')])
             ->forLanguage($language)
-            ->where(function ($query): void {
-                $query->whereNull('parent_id')->orWhere('parent_id', 0);
-            })
-            ->active()
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
+            ->where(function ($query): void { $query->whereNull('parent_id')->orWhere('parent_id', 0); })
+            ->active()->orderBy('sort_order')->orderBy('id')->get();
     }
 
     public function page(string $language, string $key): Page
     {
-        return Page::query()
-            ->forLanguage($language)
-            ->where('page_key', $key)
-            ->active()
-            ->first()
-            ?: new Page([
-                'lang_code' => $language,
-                'page_key' => $key,
-                'title' => $this->fallbackPageTitle($language, $key),
-                'subtitle' => '',
-                'body' => '',
-                'image_path' => '',
-                'meta_description' => '',
-                'is_active' => true,
-            ]);
+        return Page::query()->forLanguage($language)->where('page_key', $key)->active()->first()
+            ?: new Page(['lang_code' => $language, 'page_key' => $key, 'title' => $this->fallbackPageTitle($language, $key), 'subtitle' => '', 'body' => '', 'image_path' => '', 'meta_description' => '', 'is_active' => true]);
     }
 
     public function pageBuilderBlocks(string $language, string $pageKey, bool $preview = false): Collection
     {
-        return $preview
-            ? $this->publications->workingBlocks($language, $pageKey)
-            : $this->publications->publishedBlocks($language, $pageKey);
+        return collect();
     }
 
     public function pageBuilderDocument(string $language, string $pageKey, bool $preview = false): array
     {
-        return $this->documents->forPublic($language, $pageKey, $preview);
+        return $this->visualDocuments->document($language, $pageKey, $preview);
     }
 
     public function builderPreview(Request $request): bool
     {
-        return ($request->boolean('pb_preview') || $request->boolean('pb_editor'))
-            && (int) $request->session()->get('admin_user_id', 0) > 0;
+        return ($request->boolean('pb_preview') || $request->boolean('pb_editor')) && (int) $request->session()->get('admin_user_id', 0) > 0;
     }
 
     public function home(Request $request): array
     {
         $language = $this->language($request);
-
         return array_merge($this->shared($request, $language, 'index'), [
             'sliders' => $this->activeRows(Slider::class, $language, 'sort_order'),
             'stats' => $this->activeRows(HomeStat::class, $language, 'sort_order'),
@@ -123,35 +100,20 @@ class SiteDataService
             'sidebarAds' => Advertisement::query()->forLanguage($language)->active()->where('position_key', 'sidebar')->orderBy('sort_order')->orderBy('id')->get(),
             'bottomAds' => Advertisement::query()->forLanguage($language)->active()->where('position_key', 'bottom')->orderBy('sort_order')->orderBy('id')->get(),
             'blocks' => Block::query()->forLanguage($language)->active()->get()->keyBy('block_key'),
-            'pageBuilderBlocks' => $this->pageBuilderBlocks($language, 'index', $this->builderPreview($request)),
+            'pageBuilderBlocks' => collect(),
             'pageBuilderDocument' => $this->pageBuilderDocument($language, 'index', $this->builderPreview($request)),
         ]);
     }
 
     public function articles(string $language): array
     {
-        $categories = ArticleCategory::query()
-            ->with(['articles' => fn ($query) => $query->active()->forLanguage($language)->latest('published_at')->latest('id')])
-            ->forLanguage($language)
-            ->active()
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
-
-        return [
-            'categories' => $categories,
-            'articlesByCategory' => $categories->mapWithKeys(fn ($category) => [$category->slug => $category->articles]),
-        ];
+        $categories = ArticleCategory::query()->with(['articles' => fn ($query) => $query->active()->forLanguage($language)->latest('published_at')->latest('id')])->forLanguage($language)->active()->orderBy('sort_order')->orderBy('id')->get();
+        return ['categories' => $categories, 'articlesByCategory' => $categories->mapWithKeys(fn ($category) => [$category->slug => $category->articles])];
     }
 
     public function article(string $language, string $slug): ?Article
     {
-        return Article::query()
-            ->with('category')
-            ->forLanguage($language)
-            ->where('slug', $slug)
-            ->active()
-            ->first();
+        return Article::query()->with('category')->forLanguage($language)->where('slug', $slug)->active()->first();
     }
 
     public function gallery(string $language): EloquentCollection
@@ -161,27 +123,18 @@ class SiteDataService
 
     public function certificate(string $certificateNumber): ?Certificate
     {
-        return Certificate::query()
-            ->active()
-            ->where('cert_no', strtoupper($certificateNumber))
-            ->first();
+        return Certificate::query()->active()->where('cert_no', strtoupper($certificateNumber))->first();
     }
 
     public function currentUser(Request $request): ?SiteUser
     {
         $userId = (int) $request->session()->get('site_user_id', 0);
-
         return $userId > 0 ? SiteUser::query()->active()->find($userId) : null;
     }
 
     private function activeRows(string $modelClass, string $language, string $orderColumn): EloquentCollection
     {
-        return $modelClass::query()
-            ->forLanguage($language)
-            ->active()
-            ->orderBy($orderColumn)
-            ->orderBy('id')
-            ->get();
+        return $modelClass::query()->forLanguage($language)->active()->orderBy($orderColumn)->orderBy('id')->get();
     }
 
     private function fallbackPageTitle(string $language, string $key): string
@@ -190,7 +143,7 @@ class SiteDataService
             'az' => ['about' => 'Haqqımızda', 'contact' => 'Əlaqə', 'certificates' => 'Diplom və sertifikatlar', 'gallery' => 'Qalereya', 'trainings' => 'Təlimlər', 'articles' => 'Akademik yazılar'],
             'en' => ['about' => 'About', 'contact' => 'Contact', 'certificates' => 'Diplomas and Certificates', 'gallery' => 'Gallery', 'trainings' => 'Courses', 'articles' => 'Academic Articles'],
             'ru' => ['about' => 'О нас', 'contact' => 'Контакты', 'certificates' => 'Дипломы и сертификаты', 'gallery' => 'Галерея', 'trainings' => 'Курсы', 'articles' => 'Научные статьи'],
-            'tr' => ['about' => 'Hakkımızda', 'contact' => 'İletişim', 'certificates' => 'Diploma ve Sertifikalar', 'gallery' => 'Galeri', 'trainings' => 'Kurslar', 'articles' => 'Akademik Yazılar'],
+            'tr' => ['about' => 'Hakkımızda', 'contact' => 'İletişim', 'certificates' => 'Diploma ve Sertifikalar', 'gallery' => 'Galeri', 'trainings' => 'Eğitimler', 'articles' => 'Akademik Yazılar'],
         ];
 
         return $titles[$language][$key] ?? ucfirst(str_replace(['-', '_'], ' ', $key));

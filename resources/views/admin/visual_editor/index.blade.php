@@ -541,7 +541,7 @@
 
     function isProtectedElement(el) {
         if (!el || !el.closest) return true;
-        return !!el.closest('#veSelectionOverlay,#veNote,#veSnapGrid,script,style,meta,link,title,header,.site-header,footer,.site-footer,.auth-backdrop,.site-search,.site-search-backdrop');
+        return !!el.closest('#veSelectionOverlay,#veNote,#veSnapGrid,script,style,meta,link,title,header,.site-header,footer,.site-footer,.auth-backdrop,.site-search,.site-search-inline');
     }
 
     function isEditorElement(el) {

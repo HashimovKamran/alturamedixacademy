@@ -1,0 +1,137 @@
+{
+  "_document-vxV1UW4p.js": {
+    "file": "assets/document-vxV1UW4p.js",
+    "name": "document"
+  },
+  "_fonts-CfI9zRTh.css": {
+    "file": "assets/fonts-CfI9zRTh.css",
+    "src": "_fonts-CfI9zRTh.css"
+  },
+  "_instrument-sans-400-normal-D1W7dsQl.woff": {
+    "file": "assets/instrument-sans-400-normal-D1W7dsQl.woff",
+    "src": "_instrument-sans-400-normal-D1W7dsQl.woff"
+  },
+  "_instrument-sans-400-normal-DRC__1Mx.woff2": {
+    "file": "assets/instrument-sans-400-normal-DRC__1Mx.woff2",
+    "src": "_instrument-sans-400-normal-DRC__1Mx.woff2"
+  },
+  "_instrument-sans-400-normal-Q_nF8v4l.woff2": {
+    "file": "assets/instrument-sans-400-normal-Q_nF8v4l.woff2",
+    "src": "_instrument-sans-400-normal-Q_nF8v4l.woff2"
+  },
+  "_instrument-sans-400-normal-r32jotim.woff": {
+    "file": "assets/instrument-sans-400-normal-r32jotim.woff",
+    "src": "_instrument-sans-400-normal-r32jotim.woff"
+  },
+  "_instrument-sans-500-normal-CAxz3nsc.woff": {
+    "file": "assets/instrument-sans-500-normal-CAxz3nsc.woff",
+    "src": "_instrument-sans-500-normal-CAxz3nsc.woff"
+  },
+  "_instrument-sans-500-normal-CTEe1bJa.woff2": {
+    "file": "assets/instrument-sans-500-normal-CTEe1bJa.woff2",
+    "src": "_instrument-sans-500-normal-CTEe1bJa.woff2"
+  },
+  "_instrument-sans-500-normal-Dk9ku72i.woff2": {
+    "file": "assets/instrument-sans-500-normal-Dk9ku72i.woff2",
+    "src": "_instrument-sans-500-normal-Dk9ku72i.woff2"
+  },
+  "_instrument-sans-500-normal-Z6ESRlEs.woff": {
+    "file": "assets/instrument-sans-500-normal-Z6ESRlEs.woff",
+    "src": "_instrument-sans-500-normal-Z6ESRlEs.woff"
+  },
+  "_instrument-sans-600-normal-B7fBEWYG.woff2": {
+    "file": "assets/instrument-sans-600-normal-B7fBEWYG.woff2",
+    "src": "_instrument-sans-600-normal-B7fBEWYG.woff2"
+  },
+  "_instrument-sans-600-normal-B9e8oLYv.woff": {
+    "file": "assets/instrument-sans-600-normal-B9e8oLYv.woff",
+    "src": "_instrument-sans-600-normal-B9e8oLYv.woff"
+  },
+  "_instrument-sans-600-normal-BsaQcF38.woff2": {
+    "file": "assets/instrument-sans-600-normal-BsaQcF38.woff2",
+    "src": "_instrument-sans-600-normal-BsaQcF38.woff2"
+  },
+  "_instrument-sans-600-normal-DMks36a2.woff": {
+    "file": "assets/instrument-sans-600-normal-DMks36a2.woff",
+    "src": "_instrument-sans-600-normal-DMks36a2.woff"
+  },
+  "_instrument-sans-700-normal-BQc-7cTM.woff": {
+    "file": "assets/instrument-sans-700-normal-BQc-7cTM.woff",
+    "src": "_instrument-sans-700-normal-BQc-7cTM.woff"
+  },
+  "_instrument-sans-700-normal-CYfAanHo.woff2": {
+    "file": "assets/instrument-sans-700-normal-CYfAanHo.woff2",
+    "src": "_instrument-sans-700-normal-CYfAanHo.woff2"
+  },
+  "_instrument-sans-700-normal-ClYbKGw-.woff2": {
+    "file": "assets/instrument-sans-700-normal-ClYbKGw-.woff2",
+    "src": "_instrument-sans-700-normal-ClYbKGw-.woff2"
+  },
+  "_instrument-sans-700-normal-DfAjL1vF.woff": {
+    "file": "assets/instrument-sans-700-normal-DfAjL1vF.woff",
+    "src": "_instrument-sans-700-normal-DfAjL1vF.woff"
+  },
+  "_jsx-runtime-D2WGZPft.js": {
+    "file": "assets/jsx-runtime-D2WGZPft.js",
+    "name": "jsx-runtime"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-DDE3ZwdJ.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/pagebuilder-v2.css": {
+    "file": "assets/pagebuilder-v2-CTskUeO_.css",
+    "name": "pagebuilder-v2",
+    "names": [
+      "pagebuilder-v2.css"
+    ],
+    "src": "resources/css/pagebuilder-v2.css",
+    "isEntry": true
+  },
+  "resources/css/pagebuilder.css": {
+    "file": "assets/pagebuilder-2bG_ZPIj.css",
+    "name": "pagebuilder",
+    "names": [
+      "pagebuilder.css"
+    ],
+    "src": "resources/css/pagebuilder.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-DTPIraBc.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "_jsx-runtime-D2WGZPft.js"
+    ],
+    "css": [
+      "assets/app-DhXgT2bN.css"
+    ]
+  },
+  "resources/js/pagebuilder/canvas.tsx": {
+    "file": "assets/canvas-DeHdsriQ.js",
+    "name": "canvas",
+    "src": "resources/js/pagebuilder/canvas.tsx",
+    "isEntry": true,
+    "imports": [
+      "_jsx-runtime-D2WGZPft.js",
+      "_document-vxV1UW4p.js"
+    ]
+  },
+  "resources/js/pagebuilder/editor-runtime.tsx": {
+    "file": "assets/editor-runtime-CzHHXTpV.js",
+    "name": "editor-runtime",
+    "src": "resources/js/pagebuilder/editor-runtime.tsx",
+    "isEntry": true,
+    "imports": [
+      "_jsx-runtime-D2WGZPft.js",
+      "_document-vxV1UW4p.js"
+    ]
+  }
+}

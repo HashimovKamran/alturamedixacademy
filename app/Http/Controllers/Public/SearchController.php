@@ -20,13 +20,13 @@ class SearchController extends Controller
         $query = trim((string) $request->query('q', ''));
         $language = $languages->currentCode($request);
 
-        if (mb_strlen($query, 'UTF-8') < 2) {
+        if (mb_strlen($query, 'UTF-8') < 3) {
             return response()->json([
                 'ok' => true,
                 'query' => $query,
                 'count' => 0,
                 'results' => [],
-                'message' => 'Axtarış üçün ən azı 2 simvol yazın.',
+                'message' => 'Axtarış üçün ən azı 3 simvol yazın.',
             ]);
         }
 
