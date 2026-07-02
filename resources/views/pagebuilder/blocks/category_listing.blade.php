@@ -1,5 +1,0 @@
-@pbSchema(['name' => 'category_listing.blade'])
-@php
-    $items=\App\Models\ArticleCategory::query()->forLanguage($lang)->active()->orderBy('sort_order')->limit(max(1,(int)($content['limit']??6)))->get();
-@endphp
-<section class="section-card academic-card"><div class="section-title-row">@if($content['title']??false)<h2 data-inline-field="title">{{ $content['title'] }}</h2>@endif</div><div class="category-strip">@foreach($items as $item)<a class="category-item" href="{{ \App\Support\CleanUrl::to('articles?category='.urlencode($item->slug),$lang) }}">@if($item->image_path)<img src="{{ asset(ltrim($item->image_path,'/')) }}" alt="{{ $item->title }}">@else<i class="{{ $item->icon_class?:'fa-solid fa-book-medical' }}"></i>@endif<span data-entity="category" data-entity-id="{{ $item->id }}" data-entity-field="title">{{ $item->title }}</span></a>@endforeach<a href="{{ \App\Support\CleanUrl::to('articles',$lang) }}" class="category-next"><i class="fa-solid fa-arrow-right"></i></a></div></section>

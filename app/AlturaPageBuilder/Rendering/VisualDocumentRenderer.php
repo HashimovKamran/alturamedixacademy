@@ -83,9 +83,8 @@ final class VisualDocumentRenderer
 
     private function viewName(string $type): ?string
     {
-        foreach (['pagebuilder.sections.'.$type, 'pagebuilder.blocks.'.$type] as $view) {
-            if (View::exists($view)) return $view;
-        }
-        return null;
+        $view = 'pagebuilder.sections.'.$type;
+
+        return View::exists($view) ? $view : null;
     }
 }

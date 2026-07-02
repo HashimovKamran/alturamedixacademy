@@ -58,7 +58,6 @@
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
     <link rel="stylesheet" href="{{ asset('css/page-builder.css') }}">
     <link rel="stylesheet" href="{{ asset('css/laravel-fixes.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/alturamedix-home.css') }}">
     @stack('styles')
 </head>
 <body class="{{ $isHomepage ? 'aa-home-page' : '' }}">
