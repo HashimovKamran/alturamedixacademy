@@ -31,7 +31,7 @@
         @forelse($sliders as $index => $slider)
             @php($imageUrl = $slider->image_path ? asset(ltrim($slider->image_path, '/')) : '')
             <article class="hero-slide aa-hero-slide {{ $index === 0 ? 'active' : '' }}">
-                <div class="aa-hero-art {{ $imageUrl ? '' : 'is-empty' }}" @if($imageUrl) style="background-image:linear-gradient(90deg,rgba(1,15,30,.97) 0%,rgba(1,15,30,.88) 35%,rgba(1,15,30,.16) 75%,rgba(1,15,30,.36) 100%),url('{{ $imageUrl }}')" @endif></div>
+                <div class="aa-hero-art {{ $imageUrl ? '' : 'is-empty' }}" @if($imageUrl) style="background-image:url('{{ $imageUrl }}')" @endif></div>
                 <div class="container aa-hero-container">
                     <div class="aa-hero-copy">
                         <span class="aa-hero-eyebrow">{{ $siteSettings['hero_eyebrow'] ?? $siteName }}</span>
