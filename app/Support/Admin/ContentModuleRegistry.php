@@ -80,6 +80,7 @@ class ContentModuleRegistry
                 'title' => 'Ana səhifə statistikaları',
                 'model' => HomeStat::class,
                 'folder' => 'stats',
+                'order' => ['sort_order', 'asc'],
                 'fields' => [
                     'lang_code' => ['label' => 'Dil', 'type' => 'language'],
                     'icon_class' => ['label' => 'Icon class', 'type' => 'text'],

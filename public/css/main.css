@@ -157,6 +157,7 @@ select{
 }
 
 .language-switch{
+    position:relative;
     display:inline-flex;
     align-items:center;
     gap:9px;
@@ -166,6 +167,54 @@ select{
     font-weight:900;
     letter-spacing:0;
     white-space:nowrap;
+}
+
+.language-switch label{
+    position:absolute;
+    width:1px;
+    height:1px;
+    overflow:hidden;
+    clip:rect(0 0 0 0);
+    white-space:nowrap;
+}
+
+.language-switch select{
+    height:32px;
+    min-width:58px;
+    padding:0 25px 0 10px;
+    border:1px solid rgba(219,230,242,.28);
+    border-radius:8px;
+    background:rgba(2,21,39,.18);
+    color:#dbe6f2;
+    font:900 12px/1 var(--font-main,"Noto Sans",sans-serif);
+    text-transform:uppercase;
+    outline:0;
+    appearance:none;
+    -webkit-appearance:none;
+    cursor:pointer;
+}
+
+.language-switch select:focus{
+    border-color:var(--orange);
+    box-shadow:0 0 0 3px rgba(255,116,28,.16);
+}
+
+.language-switch select option{
+    color:#102b4c;
+    background:#fff;
+}
+
+.language-switch:after{
+    content:"\f078";
+    position:absolute;
+    right:9px;
+    top:50%;
+    font-family:"Font Awesome 6 Free";
+    font-weight:900;
+    font-size:8px;
+    color:rgba(219,230,242,.78);
+    pointer-events:none;
+    transform:translateY(-50%);
 }
 
 .language-switch a{

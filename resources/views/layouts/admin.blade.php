@@ -156,6 +156,7 @@
     ];
     $moduleNavLabels = [
         'articles' => 'Akademik yazılar',
+        'stats' => 'Statistikalar',
     ];
 @endphp
 <div class="admin-layout" data-admin-layout>
@@ -176,7 +177,7 @@
 
             <div class="nav-title">Sayt idarəsi</div>
             <a class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" href="{{ route('admin.settings.index') }}"><i class="ti ti-settings"></i> Sayt ayarları</a>
-            @foreach(['menus', 'sliders'] as $moduleKey)
+            @foreach(['menus', 'sliders', 'stats'] as $moduleKey)
                 @php($module = \App\Support\Admin\ContentModuleRegistry::get($moduleKey))
                 @if($module)
                     <a class="{{ request('module') === $moduleKey ? 'active' : '' }}" href="{{ route('admin.modules.index', ['module' => $moduleKey]) }}"><i class="{{ $moduleIcons[$moduleKey] }}"></i> {{ $moduleNavLabels[$moduleKey] ?? $module['title'] }}</a>

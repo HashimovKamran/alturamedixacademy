@@ -240,7 +240,7 @@ class ContentModuleController extends Controller
             }
         }
 
-        if (in_array($module, ['menus', 'sliders', 'ads', 'partners', 'categories', 'gallery', 'trainings'], true)) {
+        if (in_array($module, ['menus', 'sliders', 'stats', 'ads', 'partners', 'categories', 'gallery', 'trainings'], true)) {
             $currentSort = (int) ($data['sort_order'] ?? 0);
             if ($id > 0) {
                 $data['sort_order'] = $currentSort > 0 ? $currentSort : (int) $model->sort_order;
@@ -312,7 +312,7 @@ class ContentModuleController extends Controller
     public function sort(Request $request, AdminLogService $logs, string $module): JsonResponse
     {
         $module = str_replace('-', '_', $module);
-        abort_unless(in_array($module, ['menus', 'sliders', 'ads', 'partners', 'categories', 'gallery', 'trainings'], true), 404);
+        abort_unless(in_array($module, ['menus', 'sliders', 'stats', 'ads', 'partners', 'categories', 'gallery', 'trainings'], true), 404);
 
         $config = $this->config($module);
         abort_unless(array_key_exists('sort_order', $config['fields']), 404);

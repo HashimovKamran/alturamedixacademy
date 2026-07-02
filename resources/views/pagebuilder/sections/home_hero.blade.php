@@ -6,8 +6,6 @@
     $stats = \App\Models\HomeStat::query()->forLanguage($lang)->active()->orderBy('sort_order')->get();
     $autoplay = max(2500, (int) ($content['autoplay_ms'] ?? 6200));
     $showStats = \App\Support\Cms\NativeBlockOptions::enabled($content, 'show_stats');
-    $phone = trim((string) ($siteSettings['contact_phone'] ?? ''));
-    $visibleIndexCount = max(3, $sliders->count());
     $socials = [
         ['key' => 'social_instagram', 'icon' => 'fa-brands fa-instagram', 'label' => 'Instagram'],
         ['key' => 'social_youtube', 'icon' => 'fa-brands fa-youtube', 'label' => 'YouTube'],
@@ -17,15 +15,6 @@
 @endphp
 <section class="hero-section aa-home-hero">
     <aside class="aa-hero-rail" aria-label="{{ $siteName }} əlaqə linkləri">
-        <div class="aa-rail-contact">
-            @if($phone)
-                <a href="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}" class="aa-rail-phone">{{ $phone }}</a>
-            @else
-                <span class="aa-rail-phone aa-rail-phone-empty"></span>
-            @endif
-            <a href="{{ $phone ? 'tel:'.preg_replace('/[^0-9+]/', '', $phone) : '#' }}" class="aa-rail-icon aa-rail-phone-icon" aria-label="{{ $phone ?: 'Telefon' }}" @unless($phone) onclick="return false" @endunless><i class="fa-solid fa-phone"></i></a>
-        </div>
-
         <div class="aa-rail-socials" aria-label="Sosial şəbəkələr">
             @foreach($socials as $social)
                 @php($url = trim((string) ($siteSettings[$social['key']] ?? '')))
@@ -54,15 +43,13 @@
                             @if($slider->button_2_text)<a class="aa-button aa-button-outline" href="{{ \App\Support\CleanUrl::to($slider->button_2_url ?: '#', $lang) }}"><span data-entity="slider" data-entity-id="{{ $slider->id }}" data-entity-field="button_2_text">{{ $slider->button_2_text }}</span><i class="fa-solid fa-arrow-right"></i></a>@endif
                         </div>
                     </div>
+                    @if($sliders->count() > 1)
                     <div class="aa-hero-index" aria-label="Slider sıra nömrələri">
-                        @for($dotIndex = 0; $dotIndex < $visibleIndexCount; $dotIndex++)
-                            @if($dotIndex < $sliders->count())
-                                <button type="button" class="{{ $dotIndex === 0 ? 'active' : '' }}" data-slider-dot="{{ $dotIndex }}"><span>{{ str_pad((string) ($dotIndex + 1), 2, '0', STR_PAD_LEFT) }}</span></button>
-                            @else
-                                <span class="aa-hero-index-placeholder" aria-hidden="true">{{ str_pad((string) ($dotIndex + 1), 2, '0', STR_PAD_LEFT) }}</span>
-                            @endif
-                        @endfor
+                        @foreach($sliders as $dotIndex => $dotSlider)
+                            <button type="button" class="{{ $dotIndex === 0 ? 'active' : '' }}" data-slider-dot="{{ $dotIndex }}" aria-selected="{{ $dotIndex === 0 ? 'true' : 'false' }}"><span>{{ str_pad((string) ($dotIndex + 1), 2, '0', STR_PAD_LEFT) }}</span></button>
+                        @endforeach
                     </div>
+                    @endif
                 </div>
             </article>
         @empty
@@ -76,8 +63,8 @@
     </div>
 
     @if($showStats && $stats->isNotEmpty())
-        <div class="container aa-hero-stats-wrap"><div class="aa-hero-stats">
-            @foreach($stats->take(4) as $stat)
+        <div class="container aa-hero-stats-wrap"><div class="aa-hero-stats" style="--aa-stat-columns: {{ min(max($stats->count(), 1), 4) }}">
+            @foreach($stats as $stat)
                 <div class="aa-stat-item"><i class="{{ $stat->icon_class ?: 'fa-solid fa-circle-info' }}"></i><span><strong data-entity="stat" data-entity-id="{{ $stat->id }}" data-entity-field="number_text">{{ $stat->number_text }}</strong><small data-entity="stat" data-entity-id="{{ $stat->id }}" data-entity-field="title">{{ $stat->title }}</small></span></div>
             @endforeach
         </div></div>

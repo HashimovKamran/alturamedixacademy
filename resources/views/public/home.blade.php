@@ -15,8 +15,13 @@
 
 @section('content')
 <style data-aa-home-header-actions>
-body.aa-home-page .aa-site-header .aa-search-button{width:34px!important;min-height:34px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important}
+body.aa-home-page .aa-site-header .aa-search-button{box-sizing:border-box!important;width:38px!important;min-width:38px!important;height:38px!important;min-height:38px!important;flex:0 0 38px!important;padding:0!important;border:1px solid rgba(255,255,255,.35)!important;border-radius:50%!important;background:rgba(3,24,44,.18)!important}
 body.aa-home-page .aa-site-header .aa-search-label{display:none!important}
+body.aa-home-page .aa-site-header .aa-login-button{height:38px!important;min-height:38px!important;padding:0 15px!important;border-radius:9px!important;border-color:rgba(255,255,255,.38)!important;background:rgba(3,24,44,.18)!important;color:#fff!important;font-size:12px!important}
+body.aa-home-page .aa-site-header .aa-language-switch{min-height:38px!important;gap:0!important}
+body.aa-home-page .aa-site-header .aa-language-switch i{display:none!important}
+body.aa-home-page .aa-site-header .aa-language-switch select{height:38px!important;min-width:42px!important;padding:0 15px 0 0!important;border:0!important;background:transparent!important;color:#fff!important}
+body.aa-home-page .aa-site-header .aa-language-switch:after{right:0!important}
 </style>
 @include('public.partials.composition')
 @endsection

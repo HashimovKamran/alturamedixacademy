@@ -9,6 +9,7 @@ use App\Models\Article;
 use App\Models\ArticleCategory;
 use App\Models\ContactMessage;
 use App\Models\GalleryItem;
+use App\Models\HomeStat;
 use App\Models\Menu;
 use App\Models\Page;
 use App\Models\Partner;
@@ -39,6 +40,7 @@ class DashboardController extends Controller
                 ['title' => 'Məqalələr', 'value' => Article::query()->count(), 'icon' => 'ti ti-news', 'url' => route('admin.modules.index', ['module' => 'articles']), 'note' => 'Akademik yazılar'],
                 ['title' => 'Kateqoriyalar', 'value' => ArticleCategory::query()->count(), 'icon' => 'ti ti-category', 'url' => route('admin.modules.index', ['module' => 'categories']), 'note' => 'Akademik bölmələr'],
                 ['title' => 'Sliderlər', 'value' => Slider::query()->count(), 'icon' => 'ti ti-photo', 'url' => route('admin.modules.index', ['module' => 'sliders']), 'note' => 'Ana səhifə sliderləri'],
+                ['title' => 'Statistikalar', 'value' => HomeStat::query()->count(), 'icon' => 'ti ti-chart-bar', 'url' => route('admin.modules.index', ['module' => 'stats']), 'note' => 'Hero göstəriciləri'],
                 ['title' => 'Menyular', 'value' => Menu::query()->count(), 'icon' => 'ti ti-menu-2', 'url' => route('admin.modules.index', ['module' => 'menus']), 'note' => 'Header menyuları'],
                 ['title' => 'Statik səhifələr', 'value' => Page::query()->count(), 'icon' => 'ti ti-file-text', 'url' => route('admin.modules.index', ['module' => 'pages']), 'note' => 'Haqqımızda / Əlaqə'],
                 ['title' => 'Qalereya', 'value' => GalleryItem::query()->count(), 'icon' => 'ti ti-photo', 'url' => route('admin.modules.index', ['module' => 'gallery']), 'note' => 'Şəkil arxivi'],

@@ -18,7 +18,7 @@ class PublicUiText
     {
         return [
             'search' => 'Axtarış',
-            'search_min_chars' => 'Axtarış üçün ən azı 2 simvol yazın.',
+            'search_min_chars' => 'Axtarış üçün ən azı 3 simvol yazın.',
             'search_no_results' => 'Nəticə tapılmadı.',
             'searching' => 'Axtarılır...',
             'all_rights' => 'Bütün hüquqlar qorunur.',
@@ -90,7 +90,7 @@ class PublicUiText
     {
         return [
             'search' => 'Search',
-            'search_min_chars' => 'Enter at least 2 characters to search.',
+            'search_min_chars' => 'Enter at least 3 characters to search.',
             'search_no_results' => 'No results found.',
             'searching' => 'Searching...',
             'all_rights' => 'All rights reserved.',
@@ -162,7 +162,7 @@ class PublicUiText
     {
         return [
             'search' => 'Ara',
-            'search_min_chars' => 'Arama için en az 2 karakter yazın.',
+            'search_min_chars' => 'Arama için en az 3 karakter yazın.',
             'search_no_results' => 'Sonuç bulunamadı.',
             'searching' => 'Aranıyor...',
             'all_rights' => 'Tüm hakları saklıdır.',
@@ -234,7 +234,7 @@ class PublicUiText
     {
         return [
             'search' => 'Поиск',
-            'search_min_chars' => 'Введите минимум 2 символа для поиска.',
+            'search_min_chars' => 'Введите минимум 3 символа для поиска.',
             'search_no_results' => 'Результаты не найдены.',
             'searching' => 'Идет поиск...',
             'all_rights' => 'Все права защищены.',

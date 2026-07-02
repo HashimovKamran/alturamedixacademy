@@ -450,7 +450,7 @@ main,
 .site-footer,
 .footer-bottom,
 .auth-backdrop,
-.site-search-backdrop{
+.site-search-inline{
     max-width:100% !important;
 }
 

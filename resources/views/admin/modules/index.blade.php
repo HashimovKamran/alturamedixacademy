@@ -152,7 +152,7 @@ body.module-modal-open{overflow:hidden}
 
 @section('content')
 @php
-    if (in_array($moduleKey, ['pages', 'stats', 'blocks', 'features'], true)) {
+    if (in_array($moduleKey, ['pages', 'blocks', 'features'], true)) {
         abort(404);
     }
 
@@ -194,9 +194,9 @@ body.module-modal-open{overflow:hidden}
         'fa-solid fa-temperature-high' => 'Temperatur',
         'fa-solid fa-person-dots-from-line' => 'Diaqnostika',
     ];
-    $modalModules = ['menus', 'sliders', 'ads', 'partners', 'categories', 'articles', 'gallery', 'trainings', 'certificates_manage'];
+    $modalModules = ['menus', 'sliders', 'stats', 'ads', 'partners', 'categories', 'articles', 'gallery', 'trainings', 'certificates_manage'];
     $isModalModule = in_array($moduleKey, $modalModules, true);
-    $isSortableModule = in_array($moduleKey, ['menus', 'sliders', 'ads', 'partners', 'categories', 'gallery', 'trainings'], true);
+    $isSortableModule = in_array($moduleKey, ['menus', 'sliders', 'stats', 'ads', 'partners', 'categories', 'gallery', 'trainings'], true);
     $isAjaxFilterModule = in_array($moduleKey, ['articles', 'certificates_manage'], true);
     $hasFilter = in_array($moduleKey, ['articles', 'certificates_manage'], true);
     $shouldOpenModal = $isModalModule && ($edit || $errors->any() || request()->boolean('create'));

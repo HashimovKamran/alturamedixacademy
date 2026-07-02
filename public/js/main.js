@@ -16,12 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const closeMobileMenu = function () {
         setMobileMenu(false);
-        const openAboutMenu = document.querySelector('[data-about-menu]');
-        const openAboutToggle = document.querySelector('[data-about-submenu-toggle]');
-        const headerNav = openAboutMenu ? openAboutMenu.closest('.header-nav') : null;
-        if (openAboutMenu) openAboutMenu.classList.remove('is-open');
-        if (headerNav) headerNav.classList.remove('about-submenu-open');
-        if (openAboutToggle) openAboutToggle.setAttribute('aria-expanded', 'false');
+        closeAllSubmenus();
     };
 
     if (mobileBtn && mainNav) {
@@ -45,50 +40,67 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    const aboutMenu = document.querySelector('[data-about-menu]');
-    const aboutToggle = document.querySelector('[data-about-submenu-toggle]');
+    const submenuItems = Array.from(document.querySelectorAll('.nav-has-submenu'));
     const isDesktopNav = function () {
         return window.matchMedia('(min-width: 992px)').matches;
     };
 
-    const setAboutMenu = function (open) {
-        if (!aboutMenu || !aboutToggle) return;
-        const headerNav = aboutMenu.closest('.header-nav');
-        if (headerNav && open) {
-            const navRect = headerNav.getBoundingClientRect();
-            const menuRect = aboutMenu.getBoundingClientRect();
-            headerNav.style.setProperty('--about-submenu-center', (menuRect.left + (menuRect.width / 2) - navRect.left) + 'px');
+    function setSubmenu(item, open) {
+        if (!item) return;
+        const toggle = item.querySelector('[data-about-submenu-toggle]');
+        const headerNav = item.closest('.header-nav, .aa-site-header');
+
+        if (open) {
+            closeAllSubmenus(item);
+            if (headerNav) {
+                const navRect = headerNav.getBoundingClientRect();
+                const menuRect = item.getBoundingClientRect();
+                headerNav.style.setProperty('--about-submenu-center', (menuRect.left + (menuRect.width / 2) - navRect.left) + 'px');
+            }
         }
-        aboutMenu.classList.toggle('is-open', open);
+
+        item.classList.toggle('is-open', open);
         if (headerNav) headerNav.classList.toggle('about-submenu-open', open);
-        aboutToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    };
+        if (toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
 
-    if (aboutMenu && aboutToggle) {
-        aboutToggle.addEventListener('click', function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            setAboutMenu(!aboutMenu.classList.contains('is-open'));
+    function closeAllSubmenus(except) {
+        submenuItems.forEach(function (item) {
+            if (item !== except) setSubmenu(item, false);
         });
+    }
 
-        aboutMenu.addEventListener('mouseenter', function () {
-            if (isDesktopNav()) setAboutMenu(true);
-        });
+    if (submenuItems.length) {
+        submenuItems.forEach(function (item) {
+            const toggle = item.querySelector('[data-about-submenu-toggle]');
 
-        aboutMenu.addEventListener('mouseleave', function () {
-            if (isDesktopNav()) setAboutMenu(false);
+            if (toggle) {
+                toggle.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setSubmenu(item, !item.classList.contains('is-open'));
+                });
+            }
+
+            item.addEventListener('mouseenter', function () {
+                if (isDesktopNav()) setSubmenu(item, true);
+            });
+
+            item.addEventListener('mouseleave', function () {
+                if (isDesktopNav()) setSubmenu(item, false);
+            });
         });
 
         document.addEventListener('click', function (event) {
-            if (!aboutMenu.contains(event.target)) setAboutMenu(false);
+            if (!submenuItems.some(function (item) { return item.contains(event.target); })) closeAllSubmenus();
         });
 
         window.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') setAboutMenu(false);
+            if (event.key === 'Escape') closeAllSubmenus();
         });
 
         window.addEventListener('resize', function () {
-            setAboutMenu(false);
+            closeAllSubmenus();
             if (isDesktopNav()) setMobileMenu(false);
         });
     }
